@@ -1,11 +1,30 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <title>Snake</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      border: 1px solid black;
+      background: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Snake</h1>
+<canvas id="spill" width="400" height="400"></canvas>
+
+<script>
+// --- Oppsett ---
 const canvas = document.getElementById("spill");
 const ctx = canvas.getContext("2d");
 
 const rute = 20;
-const bredde = canvas.width;
-const hoyde = canvas.height;
 
-// Slange
 let slange = [
   { x: 200, y: 200 }
 ];
@@ -13,62 +32,55 @@ let slange = [
 let dx = rute;
 let dy = 0;
 
-// Mat
-let mat = {
-  x: 100,
-  y: 100
-};
-
+let mat = { x: 100, y: 100 };
 let poeng = 0;
-let spillPågår = true;
+let stopp = false;
 
-function tegnSlange() {
-  for (let del of slange) {
-    ctx.fillStyle = "green";
-    ctx.fillRect(del.x, del.y, rute, rute);
-  }
-}
+// --- Funksjoner ---
+function tegn() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function tegnMat() {
+  // Tegn mat
   ctx.fillStyle = "red";
   ctx.fillRect(mat.x, mat.y, rute, rute);
+
+  // Tegn slange
+  ctx.fillStyle = "green";
+  for (let del of slange) {
+    ctx.fillRect(del.x, del.y, rute, rute);
+  }
+
+  ctx.fillStyle = "black";
+  ctx.fillText("Poeng: " + poeng, 10, 15);
 }
 
 function nyMat() {
-  mat.x = Math.floor(Math.random() * (bredde / rute)) * rute;
-  mat.y = Math.floor(Math.random() * (hoyde / rute)) * rute;
-}
-
-function tegnPoeng() {
-  ctx.fillStyle = "black";
-  ctx.font = "20px Arial";
-  ctx.fillText("Poeng: " + poeng, 10, 20);
-}
-
-function krasj(hode) {
-  if (hode.x < 0 || hode.x >= bredde || hode.y < 0 || hode.y >= hoyde) {
-    return true;
-  }
-  for (let i = 1; i < slange.length; i++) {
-    if (hode.x === slange[i].x && hode.y === slange[i].y) {
-      return true;
-    }
-  }
-  return false;
+  mat.x = Math.floor(Math.random() * 20) * rute;
+  mat.y = Math.floor(Math.random() * 20) * rute;
 }
 
 function oppdater() {
-  if (!spillPågår) return;
+  if (stopp) return;
 
-  const hode = {
+  let hode = {
     x: slange[0].x + dx,
     y: slange[0].y + dy
   };
 
-  if (krasj(hode)) {
-    spillPågår = false;
+  // vegger
+  if (hode.x < 0 || hode.y < 0 || hode.x >= 400 || hode.y >= 400) {
+    stopp = true;
     alert("Game over! Poeng: " + poeng);
     return;
+  }
+
+  // egen kropp
+  for (let del of slange) {
+    if (hode.x === del.x && hode.y === del.y) {
+      stopp = true;
+      alert("Game over! Poeng: " + poeng);
+      return;
+    }
   }
 
   slange.unshift(hode);
@@ -80,29 +92,28 @@ function oppdater() {
     slange.pop();
   }
 
-  ctx.clearRect(0, 0, bredde, hoyde);
-  tegnMat();
-  tegnSlange();
-  tegnPoeng();
+  tegn();
 }
 
-setInterval(oppdater, 150);
-
+// --- Tastatur ---
 document.addEventListener("keydown", function(event) {
   if (event.key === "ArrowUp" && dy === 0) {
-    dx = 0;
-    dy = -rute;
+    dx = 0; dy = -rute;
   }
   if (event.key === "ArrowDown" && dy === 0) {
-    dx = 0;
-    dy = rute;
+    dx = 0; dy = rute;
   }
   if (event.key === "ArrowLeft" && dx === 0) {
-    dx = -rute;
-    dy = 0;
+    dx = -rute; dy = 0;
   }
   if (event.key === "ArrowRight" && dx === 0) {
-    dx = rute;
-    dy = 0;
+    dx = rute; dy = 0;
   }
 });
+
+setInterval(oppdater, 150);
+tegn();
+</script>
+
+</body>
+</html>
