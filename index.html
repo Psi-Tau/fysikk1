@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fysikk 1 - VGS Ressursportal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .hero-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+        .card-hover:hover { transform: translateY(-5px); transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Navigasjon -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-blue-800 flex items-center gap-2">
+                <span>⚛️</span> Fysikk 1
+            </div>
+            <div class="hidden md:flex space-x-6 font-medium">
+                <a href="#hjem" class="hover:text-blue-600">Hjem</a>
+                <a href="#lareplan" class="hover:text-blue-600">Læreplan</a>
+                <a href="#temaer" class="hover:text-blue-600">Temaer</a>
+                <a href="#verktoy" class="hover:text-blue-600">Verktøy</a>
+                <a href="#eksamen" class="hover:text-blue-600 text-orange-600">Eksamen</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Seksjon -->
+    <header id="hjem" class="hero-gradient text-white py-20 px-4 text-center">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-6">Mestre Fysikk 1 på VGS</h1>
+            <p class="text-xl opacity-90 mb-8">En komplett oversikt over teori, forsøk, programmering og eksamensforberedelser etter fagfornyelsen (LK20).</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#temaer" class="bg-white text-blue-800 px-8 py-3 rounded-full font-bold hover:bg-gray-100 shadow-lg">Start læringen</a>
+                <a href="#eksamen" class="bg-orange-500 text-white px-8 py-3 rounded-full font-bold hover:bg-orange-600 shadow-lg">Eksamenstips</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-12">
+        
+        <!-- Læreplan Seksjon -->
+        <section id="lareplan" class="mb-20">
+            <h2 class="text-3xl font-bold mb-8 border-b-2 border-blue-200 pb-2">Læreplan (LK20)</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-xl font-semibold mb-4 text-blue-700">Kjerneelementer</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-2">
+                            <span class="text-blue-500 font-bold">1.</span>
+                            <span><b>Fysikkens metoder og tenkemåter:</b> Bruk av matematikk, modellering og usikkerhetsanalyse.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-blue-500 font-bold">2.</span>
+                            <span><b>Energi og krefter:</b> Forståelse av hvordan naturen henger sammen gjennom fundamentale lover.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-blue-500 font-bold">3.</span>
+                            <span><b>Programmering og algoritmisk tenkning:</b> Bruk av Python for å løse fysikkproblemer.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                    <h3 class="text-xl font-semibold mb-4 text-blue-700">Viktige lenker</h3>
+                    <div class="flex flex-col space-y-3">
+                        <a href="https://www.udir.no/kl06/FYS01-02" target="_blank" class="text-blue-600 hover:underline flex items-center gap-2">🔗 Offisiell læreplan hos Udir</a>
+                        <a href="https://ndla.no/fag/fysikk-1" target="_blank" class="text-blue-600 hover:underline flex items-center gap-2">🔗 NDLA Fysikk 1 Ressurser</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Temaer Seksjon -->
+        <section id="temaer" class="mb-20">
+            <h2 class="text-3xl font-bold mb-8 border-b-2 border-blue-200 pb-2">Hovedtemaer</h2>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Mekanikk -->
+                <div class="bg-white p-6 rounded-xl shadow-md card-hover border-t-4 border-blue-500">
+                    <div class="text-3xl mb-4">🏎️</div>
+                    <h3 class="text-xl font-bold mb-2">Mekanikk</h3>
+                    <p class="text-gray-600 text-sm mb-4">Bevegelsesformler, Newtons lover, krefter og friksjon. Grunnmuren i fysikk.</p>
+                    <button class="text-blue-600 font-semibold hover:text-blue-800">Les mer →</button>
+                </div>
+                <!-- Elektrisitet -->
+                <div class="bg-white p-6 rounded-xl shadow-md card-hover border-t-4 border-yellow-500">
+                    <div class="text-3xl mb-4">⚡</div>
+                    <h3 class="text-xl font-bold mb-2">Elektrisitet</h3>
+                    <p class="text-gray-600 text-sm mb-4">Ladet partikler, strøm, spenning, resistans og seriekoblinger.</p>
+                    <button class="text-blue-600 font-semibold hover:text-blue-800">Les mer →</button>
+                </div>
+                <!-- Astrofysikk -->
+                <div class="bg-white p-6 rounded-xl shadow-md card-hover border-t-4 border-purple-600">
+                    <div class="text-3xl mb-4">🪐</div>
+                    <h3 class="text-xl font-bold mb-2">Astrofysikk</h3>
+                    <p class="text-gray-600 text-sm mb-4">Stjerneutvikling, strålingskurver og universets opprinnelse.</p>
+                    <button class="text-blue-600 font-semibold hover:text-blue-800">Les mer →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interaktivt Verktøy -->
+        <section id="verktoy" class="mb-20 bg-gray-800 text-white p-8 rounded-2xl shadow-2xl">
+            <div class="max-w-2xl mx-auto">
+                <h2 class="text-3xl font-bold mb-6 text-center">Fysikalsk Kalkulator</h2>
+                <p class="text-center text-gray-400 mb-8">Beregn akselerasjon eller fart lynraskt.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Startfart (v₀) [m/s]</label>
+                        <input type="number" id="v0" class="w-full bg-gray-700 border-none rounded-lg p-3 focus:ring-2 focus:ring-blue-400" placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Sluttfart (v) [m/s]</label>
+                        <input type="number" id="v" class="w-full bg-gray-700 border-none rounded-lg p-3 focus:ring-2 focus:ring-blue-400" placeholder="20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Tid (t) [s]</label>
+                        <input type="number" id="t" class="w-full bg-gray-700 border-none rounded-lg p-3 focus:ring-2 focus:ring-blue-400" placeholder="5">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="beregnAkselerasjon()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition">Beregn Akselerasjon</button>
+                    </div>
+                </div>
+                
+                <div id="calc-result" class="mt-8 p-4 bg-gray-700 rounded-lg hidden">
+                    <p class="text-center text-xl font-bold" id="result-text"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Eksamen Seksjon -->
+        <section id="eksamen" class="mb-20">
+            <h2 class="text-3xl font-bold mb-8 border-b-2 border-orange-200 pb-2">Eksamen og Vurdering</h2>
+            <div class="bg-orange-50 border-l-8 border-orange-500 p-8 rounded-r-xl">
+                <h3 class="text-2xl font-bold mb-4 text-orange-800">Muntlig-praktisk eksamen</h3>
+                <p class="mb-4">I Fysikk 1 blir man normalt trukket ut til muntlig-praktisk eksamen. Her er de viktigste forberedelsene:</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><b>Lab-journalen:</b> Ha orden i alle forsøk utført i løpet av året.</li>
+                        <li><b>Tavlepresentasjon:</b> Øv på å tegne figur og sette opp formler mens du snakker.</li>
+                        <li><b>Programmering:</b> Du kan bli bedt om å forklare en Python-kode som simulerer et fall.</li>
+                    </ul>
+                    <div class="bg-white p-4 rounded-lg shadow-inner">
+                        <h4 class="font-bold mb-2">Eksempel på eksamensoppgave:</h4>
+                        <p class="italic text-sm">"Gjør rede for Newtons lover. Vis hvordan du kan bruke en vogn på en lufthustid til å verifisere Newtons 2. lov eksperimentelt."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white py-12 text-center">
+        <p class="opacity-60 mb-4">&copy; 2024 Fysikk 1 Ressursportal. Laget for elever i videregående skole.</p>
+        <div class="flex justify-center space-x-6">
+            <a href="https://github.com" class="hover:text-blue-400">GitHub</a>
+            <a href="#" class="hover:text-blue-400">Kontakt</a>
+        </div>
+    </footer>
+
+    <script>
+        function beregnAkselerasjon() {
+            const v0 = parseFloat(document.getElementById('v0').value);
+            const v = parseFloat(document.getElementById('v').value);
+            const t = parseFloat(document.getElementById('t').value);
+            const resultDiv = document.getElementById('calc-result');
+            const resultText = document.getElementById('result-text');
+
+            if (isNaN(v0) || isNaN(v) || isNaN(t) || t <= 0) {
+                resultDiv.classList.remove('hidden');
+                resultDiv.className = "mt-8 p-4 bg-red-900 text-white rounded-lg";
+                resultText.innerText = "Vennligst fyll inn gyldige tall (tid må være > 0).";
+                return;
+            }
+
+            // Formel: a = (v - v0) / t
+            const a = (v - v0) / t;
+            
+            resultDiv.classList.remove('hidden');
+            resultDiv.className = "mt-8 p-4 bg-green-900 text-white rounded-lg";
+            resultText.innerHTML = `Akselerasjonen (a) er: <span class="text-2xl text-green-400">${a.toFixed(2)} m/s²</span>`;
+        }
+
+        // Smooth scroll for navigasjon
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
