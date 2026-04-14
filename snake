@@ -1,0 +1,108 @@
+const canvas = document.getElementById("spill");
+const ctx = canvas.getContext("2d");
+
+const rute = 20;
+const bredde = canvas.width;
+const hoyde = canvas.height;
+
+// Slange
+let slange = [
+  { x: 200, y: 200 }
+];
+
+let dx = rute;
+let dy = 0;
+
+// Mat
+let mat = {
+  x: 100,
+  y: 100
+};
+
+let poeng = 0;
+let spillPågår = true;
+
+function tegnSlange() {
+  for (let del of slange) {
+    ctx.fillStyle = "green";
+    ctx.fillRect(del.x, del.y, rute, rute);
+  }
+}
+
+function tegnMat() {
+  ctx.fillStyle = "red";
+  ctx.fillRect(mat.x, mat.y, rute, rute);
+}
+
+function nyMat() {
+  mat.x = Math.floor(Math.random() * (bredde / rute)) * rute;
+  mat.y = Math.floor(Math.random() * (hoyde / rute)) * rute;
+}
+
+function tegnPoeng() {
+  ctx.fillStyle = "black";
+  ctx.font = "20px Arial";
+  ctx.fillText("Poeng: " + poeng, 10, 20);
+}
+
+function krasj(hode) {
+  if (hode.x < 0 || hode.x >= bredde || hode.y < 0 || hode.y >= hoyde) {
+    return true;
+  }
+  for (let i = 1; i < slange.length; i++) {
+    if (hode.x === slange[i].x && hode.y === slange[i].y) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function oppdater() {
+  if (!spillPågår) return;
+
+  const hode = {
+    x: slange[0].x + dx,
+    y: slange[0].y + dy
+  };
+
+  if (krasj(hode)) {
+    spillPågår = false;
+    alert("Game over! Poeng: " + poeng);
+    return;
+  }
+
+  slange.unshift(hode);
+
+  if (hode.x === mat.x && hode.y === mat.y) {
+    poeng = poeng + 1;
+    nyMat();
+  } else {
+    slange.pop();
+  }
+
+  ctx.clearRect(0, 0, bredde, hoyde);
+  tegnMat();
+  tegnSlange();
+  tegnPoeng();
+}
+
+setInterval(oppdater, 150);
+
+document.addEventListener("keydown", function(event) {
+  if (event.key === "ArrowUp" && dy === 0) {
+    dx = 0;
+    dy = -rute;
+  }
+  if (event.key === "ArrowDown" && dy === 0) {
+    dx = 0;
+    dy = rute;
+  }
+  if (event.key === "ArrowLeft" && dx === 0) {
+    dx = -rute;
+    dy = 0;
+  }
+  if (event.key === "ArrowRight" && dx === 0) {
+    dx = rute;
+    dy = 0;
+  }
+});
