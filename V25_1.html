@@ -20,6 +20,22 @@
     button {
       padding: 10px 20px;
       font-size: 16px;
+      margin-top: 10px;
+    }
+
+    /* Kun resultat skrives ut */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #utskrift, #utskrift * {
+        visibility: visible;
+      }
+      #utskrift {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
     }
   </style>
 </head>
@@ -71,13 +87,15 @@
 </div>
 
 <button type="button" onclick="rettQuiz()">Lever svar</button>
+<button type="button" onclick="window.print()">Lagre som PDF</button>
 
 </form>
 
-<p id="resultat"></p>
+<div id="utskrift">
+  <h2>Resultat</h2>
+  <p id="resultat"></p>
+</div>
 
-<!-- jsPDF -->
-https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
 
 <script>
 function rettQuiz() {
@@ -100,23 +118,13 @@ function rettQuiz() {
   }
 
   document.getElementById("resultat").innerHTML =
-    "Du fikk " + riktige + " av " + antall + " riktige.";
 
-  lagPDF(riktige, antall);
+    "Du fikk <b>" + riktige + "</b> av <b>" + antall + "</b> riktige.";
 }
 
-function lagPDF(riktige, antall) {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF();
 
-  pdf.setFontSize(16);
-  pdf.text("Fysikk 2 – Resultat", 20, 30);
 
-  pdf.setFontSize(12);
-  pdf.text("Antall riktige svar: " + riktige + " av " + antall, 20, 50);
 
-  pdf.save("fysikk2_del1_resultat.pdf");
-}
 </script>
 
 </body>
