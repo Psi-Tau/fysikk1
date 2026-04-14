@@ -1,0 +1,453 @@
+import React, { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Search, Shuffle, RotateCcw, ChevronLeft, ChevronRight, CheckCircle2, BookOpen, Sparkles } from "lucide-react";
+
+const ALL_CARDS = [
+  {
+    id: 1,
+    category: "Begrep",
+    difficulty: "Lett",
+    question: "Hva er Big Bang-teorien?",
+    answer:
+      "Big Bang-teorien forklarer hvordan universet oppsto og har utviklet seg. Teorien sier at universet startet i en ekstremt varm og tett tilstand og har utvidet seg siden.",
+  },
+  {
+    id: 2,
+    category: "Tidslinje",
+    difficulty: "Lett",
+    question: "Når skjedde Big Bang omtrent?",
+    answer:
+      "For omtrent 13,8 milliarder år siden.",
+  },
+  {
+    id: 3,
+    category: "Begrep",
+    difficulty: "Middels",
+    question: "Hvorfor er det litt misvisende å kalle Big Bang en eksplosjon?",
+    answer:
+      "Det var ikke en eksplosjon ut i tomt rom. Det var selve rommet som utvidet seg, og derfor øker avstanden mellom galaksene.",
+  },
+  {
+    id: 4,
+    category: "Bevis",
+    difficulty: "Middels",
+    question: "Hva er rødforskyvning, og hvorfor er det viktig?",
+    answer:
+      "Rødforskyvning betyr at lys fra fjerne galakser får lengre bølgelengde. Det tolkes som at galaksene beveger seg bort fra oss, noe som støtter at universet utvider seg.",
+  },
+  {
+    id: 5,
+    category: "Bevis",
+    difficulty: "Middels",
+    question: "Hva er kosmisk bakgrunnsstråling?",
+    answer:
+      "Det er svak mikrobølgestråling som fyller hele universet. Den regnes som et ekko fra det tidlige universet og er et viktig bevis for Big Bang.",
+  },
+  {
+    id: 6,
+    category: "Bevis",
+    difficulty: "Vanskelig",
+    question: "Hvordan støtter grunnstoffenes fordeling Big Bang-teorien?",
+    answer:
+      "Teorien forutsier store mengder hydrogen og helium i universet. Observasjoner stemmer godt med dette, og derfor styrkes teorien.",
+  },
+  {
+    id: 7,
+    category: "Tidslinje",
+    difficulty: "Middels",
+    question: "Hva skjedde kort tid etter Big Bang?",
+    answer:
+      "Universet utvidet seg raskt og kjølte seg ned. Etter hvert kunne de første partiklene og senere atomkjernene dannes.",
+  },
+  {
+    id: 8,
+    category: "Tidslinje",
+    difficulty: "Middels",
+    question: "Når kunne de første atomene dannes?",
+    answer:
+      "Da universet hadde kjølt seg nok ned, kunne elektroner binde seg til atomkjerner. Da ble universet gjennomsiktig for lys.",
+  },
+  {
+    id: 9,
+    category: "Tidslinje",
+    difficulty: "Middels",
+    question: "Når ble de første stjernene dannet?",
+    answer:
+      "Etter noen hundre millioner år samlet gass seg på grunn av gravitasjon, og de første stjernene ble dannet.",
+  },
+  {
+    id: 10,
+    category: "Begrep",
+    difficulty: "Lett",
+    question: "Hva betyr det at universet utvider seg?",
+    answer:
+      "Det betyr at avstanden mellom galakser øker over tid fordi rommet strekkes.",
+  },
+  {
+    id: 11,
+    category: "Refleksjon",
+    difficulty: "Middels",
+    question: "Hva forklarer Big Bang-teorien – og hva forklarer den ikke?",
+    answer:
+      "Teorien forklarer utviklingen av universet fra en tidlig, varm og tett tilstand. Den forklarer ikke sikkert hvorfor Big Bang skjedde, eller hva som eventuelt var 'før'.",
+  },
+  {
+    id: 12,
+    category: "Bevis",
+    difficulty: "Middels",
+    question: "Hvilke tre hovedobservasjoner brukes ofte som støtte for Big Bang?",
+    answer:
+      "1) Rødforskyvning av lys fra galakser. 2) Kosmisk bakgrunnsstråling. 3) Fordelingen av lette grunnstoffer som hydrogen og helium.",
+  },
+  {
+    id: 13,
+    category: "Begrep",
+    difficulty: "Lett",
+    question: "Hva er forskjellen på en hypotese, en modell og en teori?",
+    answer:
+      "En hypotese er en foreløpig forklaring. En modell er en forenklet framstilling. En teori er en godt støttet forklaring basert på mange observasjoner og undersøkelser.",
+  },
+  {
+    id: 14,
+    category: "Refleksjon",
+    difficulty: "Vanskelig",
+    question: "Hvorfor er Big Bang et godt eksempel på hvordan naturvitenskap utvikles?",
+    answer:
+      "Fordi teorien er bygget opp gjennom observasjoner, tolkninger, modeller og ny teknologi. Den er også blitt justert og styrket etter hvert som forskere har fått nye data.",
+  },
+  {
+    id: 15,
+    category: "Tidslinje",
+    difficulty: "Middels",
+    question: "Hva kom først: stjerner eller planeter?",
+    answer:
+      "Stjerner kom først. Planeter ble senere dannet av støv og gass rundt unge stjerner.",
+  },
+  {
+    id: 16,
+    category: "Refleksjon",
+    difficulty: "Middels",
+    question: "Hvordan kan vi 'se tilbake i tid' når vi observerer universet?",
+    answer:
+      "Lys bruker tid på å reise. Når vi ser veldig langt ut i universet, ser vi objekter slik de var for lenge siden.",
+  },
+];
+
+const categories = ["Alle", ...Array.from(new Set(ALL_CARDS.map((c) => c.category)))];
+
+function Flashcard({ card, flipped, onFlip }) {
+  return (
+    <motion.div
+      className="relative h-[360px] w-full cursor-pointer [perspective:1200px]"
+      onClick={onFlip}
+      whileHover={{ scale: 1.01 }}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div
+        className="absolute inset-0"
+        animate={{ rotateY: flipped ? 180 : 0 }}
+        transition={{ duration: 0.5 }}
+        style={{ transformStyle: "preserve-3d" }}
+      >
+        <Card className="absolute inset-0 rounded-3xl border-slate-200 shadow-xl [backface-visibility:hidden] bg-white">
+          <CardHeader className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary" className="rounded-full">{card.category}</Badge>
+              <Badge variant="outline" className="rounded-full">{card.difficulty}</Badge>
+            </div>
+            <CardTitle className="text-2xl md:text-3xl leading-tight text-slate-900">
+              {card.question}
+            </CardTitle>
+            <CardDescription className="text-base text-slate-600">
+              Klikk for å vise svar
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex h-[220px] items-end">
+            <div className="flex items-center gap-2 text-sky-700">
+              <BookOpen className="h-5 w-5" />
+              <span className="text-sm font-medium">Øv aktiv gjenhenting: prøv å svare før du snur kortet.</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="absolute inset-0 rounded-3xl border-sky-200 shadow-xl [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-sky-50 to-indigo-50">
+          <CardHeader className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge className="rounded-full bg-sky-600 hover:bg-sky-600">Svar</Badge>
+              <Badge variant="outline" className="rounded-full border-sky-300 text-sky-800">{card.category}</Badge>
+            </div>
+            <CardTitle className="text-xl md:text-2xl text-slate-900">
+              {card.question}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex h-[240px] items-center">
+            <p className="text-lg leading-8 text-slate-800">{card.answer}</p>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export default function BigBangFlashcardsVG1() {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("Alle");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [mastered, setMastered] = useState([]);
+
+  const filteredCards = useMemo(() => {
+    return ALL_CARDS.filter((card) => {
+      const matchesCategory = category === "Alle" || card.category === category;
+      const q = query.trim().toLowerCase();
+      const matchesQuery =
+        q === "" ||
+        card.question.toLowerCase().includes(q) ||
+        card.answer.toLowerCase().includes(q) ||
+        card.category.toLowerCase().includes(q);
+      return matchesCategory && matchesQuery;
+    });
+  }, [query, category]);
+
+  const currentCard = filteredCards[currentIndex] || null;
+  const progress = filteredCards.length ? ((currentIndex + 1) / filteredCards.length) * 100 : 0;
+
+  const goNext = () => {
+    if (!filteredCards.length) return;
+    setFlipped(false);
+    setCurrentIndex((prev) => (prev + 1) % filteredCards.length);
+  };
+
+  const goPrev = () => {
+    if (!filteredCards.length) return;
+    setFlipped(false);
+    setCurrentIndex((prev) => (prev - 1 + filteredCards.length) % filteredCards.length);
+  };
+
+  const shuffleCards = () => {
+    // Pseudoshuffle by rotating to a random card in the current filtered view.
+    if (!filteredCards.length) return;
+    setFlipped(false);
+    setCurrentIndex(Math.floor(Math.random() * filteredCards.length));
+  };
+
+  const resetAll = () => {
+    setQuery("");
+    setCategory("Alle");
+    setCurrentIndex(0);
+    setFlipped(false);
+    setMastered([]);
+  };
+
+  const toggleMastered = () => {
+    if (!currentCard) return;
+    setMastered((prev) =>
+      prev.includes(currentCard.id)
+        ? prev.filter((id) => id !== currentCard.id)
+        : [...prev, currentCard.id]
+    );
+  };
+
+  const masteredInView = filteredCards.filter((card) => mastered.includes(card.id)).length;
+
+  React.useEffect(() => {
+    if (currentIndex > filteredCards.length - 1) {
+      setCurrentIndex(0);
+      setFlipped(false);
+    }
+  }, [filteredCards.length, currentIndex]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-sky-50 p-4 md:p-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="grid gap-4 md:grid-cols-[1.4fr_0.8fr]"
+        >
+          <Card className="rounded-[2rem] border-0 bg-gradient-to-br from-sky-600 via-indigo-600 to-slate-900 text-white shadow-2xl">
+            <CardHeader className="space-y-4 p-8">
+              <div className="flex items-center gap-3 text-sky-100">
+                <Sparkles className="h-6 w-6" />
+                <span className="text-sm font-semibold uppercase tracking-[0.2em]">Naturfag VG1</span>
+              </div>
+              <CardTitle className="text-4xl md:text-5xl font-bold leading-tight">
+                Flashcards om Big Bang
+              </CardTitle>
+              <CardDescription className="max-w-2xl text-base md:text-lg text-sky-50/90">
+                Øv på sentrale begreper, tidslinje og observasjoner som støtter Big Bang-teorien.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="rounded-[2rem] shadow-xl border-slate-200">
+            <CardHeader>
+              <CardTitle className="text-xl">Fremdrift</CardTitle>
+              <CardDescription>Hold oversikt over hvilke kort du kan.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <div className="mb-2 flex items-center justify-between text-sm text-slate-600">
+                  <span>Kort i visning</span>
+                  <span>{filteredCards.length}</span>
+                </div>
+                <Progress value={progress} className="h-3" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <div className="text-sm text-slate-500">Plassering</div>
+                  <div className="text-2xl font-bold text-slate-900">
+                    {filteredCards.length ? `${currentIndex + 1}/${filteredCards.length}` : "0/0"}
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-emerald-50 p-4">
+                  <div className="text-sm text-emerald-700">Kan disse</div>
+                  <div className="text-2xl font-bold text-emerald-800">{masteredInView}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <Card className="rounded-[2rem] shadow-lg border-slate-200">
+          <CardContent className="p-4 md:p-6">
+            <div className="grid gap-3 md:grid-cols-[1.2fr_auto] md:items-center">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setCurrentIndex(0);
+                    setFlipped(false);
+                  }}
+                  placeholder="Søk etter begrep, bevis eller spørsmål ..."
+                  className="h-11 rounded-2xl pl-10"
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((item) => (
+                  <Button
+                    key={item}
+                    variant={category === item ? "default" : "outline"}
+                    className="rounded-full"
+                    onClick={() => {
+                      setCategory(item);
+                      setCurrentIndex(0);
+                      setFlipped(false);
+                    }}
+                  >
+                    {item}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+          <div className="space-y-4">
+            {currentCard ? (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentCard.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <Flashcard card={currentCard} flipped={flipped} onFlip={() => setFlipped((v) => !v)} />
+                </motion.div>
+              </AnimatePresence>
+            ) : (
+              <Card className="rounded-[2rem] shadow-lg">
+                <CardContent className="flex h-[360px] items-center justify-center p-8 text-center text-slate-600">
+                  Ingen kort matcher søket ditt. Prøv et annet søkeord eller velg kategorien “Alle”.
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[2rem] bg-white p-4 shadow-lg border border-slate-200">
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" className="rounded-2xl" onClick={goPrev}>
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Forrige
+                </Button>
+                <Button variant="outline" className="rounded-2xl" onClick={() => setFlipped((v) => !v)} disabled={!currentCard}>
+                  Snur kort
+                </Button>
+                <Button variant="outline" className="rounded-2xl" onClick={goNext}>
+                  Neste <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" className="rounded-2xl" onClick={shuffleCards}>
+                  <Shuffle className="mr-2 h-4 w-4" /> Tilfeldig
+                </Button>
+                <Button
+                  className={`rounded-2xl ${currentCard && mastered.includes(currentCard.id) ? "bg-emerald-600 hover:bg-emerald-600" : ""}`}
+                  onClick={toggleMastered}
+                  disabled={!currentCard}
+                >
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  {currentCard && mastered.includes(currentCard.id) ? "Kan denne" : "Marker som kan"}
+                </Button>
+                <Button variant="ghost" className="rounded-2xl" onClick={resetAll}>
+                  <RotateCcw className="mr-2 h-4 w-4" /> Nullstill
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Card className="rounded-[2rem] shadow-lg border-slate-200">
+              <CardHeader>
+                <CardTitle className="text-xl">Slik bruker du siden</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-slate-700 leading-7">
+                <p>1. Les spørsmålet og prøv å svare høyt eller skriftlig før du snur kortet.</p>
+                <p>2. Marker kort du kan, og bruk søk eller kategorier for å øve målrettet.</p>
+                <p>3. Start med begreper, gå videre til bevis, og avslutt med refleksjonsspørsmål.</p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-[2rem] shadow-lg border-slate-200">
+              <CardHeader>
+                <CardTitle className="text-xl">Huskeliste til prøve</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-slate-700 leading-7">
+                <p><strong>Du bør kunne forklare:</strong></p>
+                <ul className="list-disc space-y-2 pl-5">
+                  <li>hva Big Bang-teorien sier</li>
+                  <li>at universet utvider seg</li>
+                  <li>rødforskyvning</li>
+                  <li>kosmisk bakgrunnsstråling</li>
+                  <li>hvorfor fordelingen av hydrogen og helium er viktig</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-[2rem] shadow-lg border-slate-200 bg-slate-900 text-white">
+              <CardHeader>
+                <CardTitle className="text-xl">Kobling til kompetansemål</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-slate-200 leading-7">
+                <p>
+                  Denne siden trener på å beskrive Big Bang-teorien og gjøre rede for observasjoner som støtter teorien.
+                </p>
+                <p className="text-sm text-slate-300">
+                  Fint egnet til repetisjon, stasjonsundervisning eller egenøving før vurdering.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
