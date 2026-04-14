@@ -1,241 +1,229 @@
-import React, { useState } from 'react';
-import { CheckCircle, XCircle, RefreshCw, Award, ChevronRight, ChevronLeft, Download, BookOpen } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fysikk 2 - Eksamenstrening V25</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+            .card { box-shadow: none !important; border: 1px solid #eee !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
 
-const questions = [
-  { id: "a", topic: "Mekanikk", q: "En ball blir kastet skrått oppover. Vi ser bort fra luftmotstand. Hva er farten til ballen i det høyeste punktet i banen?", a: "C", opts: ["Farten er lik null.", "Farten er lik starthastigheten.", "Farten er lik den horisontale komponenten til starthastigheten.", "Farten er lik den vertikale komponenten til starthastigheten."] },
-  { id: "b", topic: "Mekanikk", q: "En ball faller vertikalt nedover. Vi tar hensyn til luftmotstand. Hva skjer med akselerasjonen til ballen etter hvert som farten øker?", a: "D", opts: ["Akselerasjonen øker.", "Akselerasjonen er konstant lik g.", "Akselerasjonen er konstant, men mindre enn g.", "Akselerasjonen avtar mot null."] },
-  { id: "c", topic: "Mekanikk", q: "En kloss ligger i ro på et skråplan. Hva er forholdet mellom friksjonskraften R og normalkraften N på klossen?", a: "B", opts: ["R = N", "R = N · tan(α) der α er helningsvinkelen.", "R = N · sin(α)", "R er alltid større enn N."] },
-  { id: "d", topic: "Mekanikk", q: "En gjenstand utfører en jevn sirkelbevegelse. Hva er retningen til akselerasjonen?", a: "B", opts: ["Langs tangenten til banen.", "Innover mot sentrum i sirkelen.", "Utover fra sentrum i sirkelen.", "Akselerasjonen er null."] },
-  { id: "e", topic: "Mekanikk", q: "En kjeglependel roterer med konstant fart. Hva er sant om summen av kreftene (ΣF) på loddet?", a: "A", opts: ["ΣF er rettet horisontalt mot sentrum i sirkelbanen.", "ΣF er null fordi farten er konstant.", "ΣF er rettet langs snora.", "ΣF er rettet vertikalt nedover."] },
-  { id: "f", topic: "Mekanikk", q: "To kuler med masse m og 2m slippes fra samme høyde. Vi ser bort fra luftmotstand. Hvilken påstand er sann?", a: "C", opts: ["Kula med masse 2m har dobbelt så stor akselerasjon.", "Kula med masse m lander først.", "Begge kulene lander samtidig med samme fart.", "Kula med masse 2m har størst fart når den lander."] },
-  { id: "g", topic: "Mekanikk", q: "En tynn homogen stang med lengde L og masse M kan rotere om en akse i enden (I = 1/3 ML²). Stanga slippes fra vannrett stilling. Hva er vinkelfarten når den er vertikal?", a: "B", opts: ["ω = √(g/L)", "ω = √(3g/L)", "ω = √(2g/L)", "ω = 3g/L"] },
-  { id: "h", topic: "Feltfysikk", q: "En planet har dobbelt så stor masse som jorda og dobbelt så stor radius. Hva er gravitasjonsfeltstyrken på overflaten sammenlignet med jorda (g)?", a: "C", opts: ["2g", "g", "0,5g", "0,25g"] },
-  { id: "i", topic: "Feltfysikk", q: "En asteroide beveger seg i et gravitasjonsfelt. Hvilken størrelse er bevart dersom vi ser bort fra andre krefter enn gravitasjon?", a: "A", opts: ["Mekanisk energi.", "Fart.", "Kinetisk energi.", "Potensiell energi."] },
-  { id: "j", topic: "Feltfysikk", q: "To ladninger q₁ og q₂ har avstand r. Dersom begge ladningene dobles og avstanden dobles, hva skjer med den elektriske kraften?", a: "B", opts: ["Den blir fire ganger større.", "Den forblir uendret.", "Den blir dobbelt så stor.", "Den halveres."] },
-  { id: "k", topic: "Feltfysikk", q: "Et elektron beveger seg med farten v inn i et homogent elektrisk felt E rettet mot fartsretningen. Hva skjer med farten?", a: "D", opts: ["Farten øker lineært.", "Farten er konstant.", "Farten øker kvadratisk.", "Farten avtar."] },
-  { id: "l", topic: "Induksjon", q: "En leder med lengde L beveger seg med fart v vinkelrett på et magnetfelt B. Hva er den induserte spenningen?", a: "A", opts: ["ε = vBL", "ε = vB/L", "ε = B/vL", "ε = 0"] },
-  { id: "m", topic: "Induksjon", q: "En spole med N vindinger roterer i et magnetfelt. Hva skjer med maksimal indusert spenning dersom rotasjonsfarten dobles?", a: "A", opts: ["Den dobles.", "Den firedobles.", "Den forblir uendret.", "Den halveres."] },
-  { id: "n", topic: "Induksjon", q: "En magnet faller gjennom et kobberrør. Hvorfor faller den saktere enn i fritt fall?", a: "C", opts: ["Luftmotstand i røret.", "Kobber er magnetisk.", "Induserte strømmer skaper et motvirkende magnetfelt.", "Tyngdekraften er svakere i metallrør."] },
-  { id: "o", topic: "Moderne fysikk", q: "Hva skjer med tiden på en klokke som beveger seg med svært høy fart i forhold til en observatør i ro?", a: "B", opts: ["Klokka går fortere.", "Klokka går saktere.", "Tiden påvirkes ikke av fart.", "Klokka stopper helt."] },
-  { id: "p", topic: "Moderne fysikk", q: "Ifølge generell relativitetsteori vil lys som passerer nær en massiv stjerne:", a: "A", opts: ["Bøyes av mot stjernen.", "Bevege seg i en rett linje.", "Øke farten.", "Bli absorbert uansett avstand."] },
-  { id: "q", topic: "Moderne fysikk", q: "Hva kalles fenomenet der lys fra fjerne galakser har lengre bølgelengde enn forventet?", a: "C", opts: ["Blåforskyvning.", "Fotoelektrisk effekt.", "Rødforskyvning.", "Comptoneffekt."] },
-  { id: "r", topic: "Moderne fysikk", q: "I Comptoneffekten kolliderer et foton med et elektron. Hva skjer med fotonet?", a: "B", opts: ["Det får kortere bølgelengde.", "Det får lengre bølgelengde og endrer retning.", "Det forsvinner helt.", "Det beholder all sin energi."] },
-  { id: "s", topic: "Kvantefysikk", q: "Hvilken påstand om bølgefunksjonen ψ er korrekt?", a: "D", opts: ["ψ forteller nøyaktig hvor partikkelen er.", "ψ er alltid et reelt tall.", "ψ² er lik partikkelens fart.", "|ψ|² gir sannsynlighetstettheten for å finne partikkelen."] },
-  { id: "t", topic: "Kvantefysikk", q: "Hvilken egenskap ved lys bevises gjennom den fotoelektriske effekten?", a: "A", opts: ["Partikkelegenskapen.", "Bølgeegenskapen.", "At lys er en longitudinell bølge.", "At lys trenger et medium."] }
-];
-
-export default function App() {
-  const [answers, setAnswers] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-
-  const handleSelect = (qId, option) => {
-    if (submitted) return;
-    setAnswers({ ...answers, [qId]: option });
-  };
-
-  const getTopicStats = () => {
-    const stats = {};
-    questions.forEach(q => {
-      if (!stats[q.topic]) stats[q.topic] = { total: 0, correct: 0 };
-      stats[q.topic].total++;
-      if (answers[q.id] === q.a) stats[q.topic].correct++;
-    });
-    return stats;
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  if (submitted) {
-    const score = questions.filter(q => answers[q.id] === q.a).length;
-    const percent = (score / questions.length) * 100;
-    const stats = getTopicStats();
-    
-    return (
-      <div className="min-h-screen bg-slate-50 p-4 md:p-8 flex flex-col items-center print:bg-white print:p-0">
-        <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 print:shadow-none print:border-none">
-          
-          <div className="bg-blue-700 p-8 text-center text-white print:bg-white print:text-black print:border-b-2">
-            <Award className="w-16 h-16 mx-auto mb-4 opacity-90 print:hidden" />
-            <h1 className="text-3xl font-bold mb-2">Eksamensrapport: Fysikk 2</h1>
-            <p className="text-blue-100 print:text-slate-600">Resultat fra flervalgsoppgaver - Del 1</p>
-          </div>
-          
-          <div className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-              <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 text-center">
-                <p className="text-sm text-slate-500 uppercase font-bold mb-1">Total Score</p>
-                <p className="text-5xl font-black text-slate-800">{score} / {questions.length}</p>
-                <div className="mt-2 text-2xl font-bold text-blue-600">{percent.toFixed(1)}%</div>
-              </div>
-
-              <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                <p className="text-sm text-slate-500 uppercase font-bold mb-4">Analyse per emne</p>
-                <div className="space-y-3">
-                  {Object.entries(stats).map(([topic, data]) => {
-                    const p = (data.correct / data.total) * 100;
-                    return (
-                      <div key={topic}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="font-semibold">{topic}</span>
-                          <span className={p < 50 ? 'text-red-600 font-bold' : 'text-green-600 font-bold'}>
-                            {data.correct}/{data.total} ({p.toFixed(0)}%)
-                          </span>
-                        </div>
-                        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                          <div className={`h-full ${p < 50 ? 'bg-red-500' : 'bg-green-500'}`} style={{ width: `${p}%` }}></div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-10 p-6 bg-blue-50 rounded-xl border border-blue-100">
-              <div className="flex items-center gap-2 mb-3 text-blue-800">
-                <BookOpen size={20} />
-                <h2 className="font-bold text-lg">Vurdering og anbefaling</h2>
-              </div>
-              <p className="text-slate-700 leading-relaxed">
-                {percent === 100 ? "Perfekt! Du har full kontroll på teorien i Del 1. Fortsett å fokusere på de lengre regneoppgavene i Del 2." : 
-                 percent >= 80 ? "Meget bra! Du har et sterkt teoretisk grunnlag. Se over de få feilene du hadde for å luke ut slurvefeil." :
-                 percent >= 50 ? "Godt bestått, men det er rom for forbedring. Bruk emneanalysen ovenfor for å se hvilke områder du må lese mer på." :
-                 "Her er det behov for mer repetisjon. Gå gjennom læreboka for de emnene som har rød stolpe i oversikten."}
-              </p>
-              <div className="mt-4 text-sm font-semibold text-blue-900 uppercase">
-                Fokusområder: {Object.entries(stats).filter(([_, d]) => (d.correct/d.total) < 0.7).map(e => e[0]).join(", ") || "Ingen spesielle - ser bra ut!"}
-              </div>
-            </div>
-
-            <div className="flex gap-4 mb-8 print:hidden">
-              <button 
-                onClick={handlePrint}
-                className="flex-1 bg-slate-800 hover:bg-black text-white font-bold py-4 rounded-xl flex justify-center items-center gap-2 transition-all"
-              >
-                <Download size={20} /> Last ned PDF / Skriv ut
-              </button>
-              <button 
-                onClick={() => { setAnswers({}); setSubmitted(false); setCurrentStep(0); }}
-                className="flex-1 bg-white border-2 border-slate-200 hover:border-blue-600 text-slate-700 font-bold py-4 rounded-xl flex justify-center items-center gap-2 transition-all"
-              >
-                <RefreshCw size={20} /> Prøv på nytt
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-slate-800 mb-4">Gjennomgang av alle svar:</h2>
-              {questions.map((q) => (
-                <div key={q.id} className={`p-4 rounded-lg border ${answers[q.id] === q.a ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} break-inside-avoid`}>
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1">
-                      {answers[q.id] === q.a ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <p className="font-semibold text-slate-800">{q.id}) {q.q}</p>
-                        <span className="text-xs font-bold uppercase text-slate-400 bg-white px-2 py-1 rounded border ml-2 shrink-0">{q.topic}</span>
-                      </div>
-                      <p className="text-sm mt-2">
-                        Ditt svar: <span className={answers[q.id] === q.a ? "font-bold text-green-700" : "font-bold text-red-700"}>{answers[q.id] || "Ikke besvart"}</span> 
-                        {answers[q.id] !== q.a && <span className="ml-4">Riktig svar: <span className="font-bold text-green-700">{q.a}</span></span>}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const currentQ = questions[currentStep];
-
-  return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 flex flex-col items-center">
-      <div className="max-w-2xl w-full">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-black text-slate-800 mb-2 tracking-tight">Fysikk 2 Quiz</h1>
-          <p className="text-slate-500 font-medium italic">Eksamen V25 - Oppgave 1</p>
+    <div id="quiz-container" class="max-w-3xl mx-auto py-10 px-4">
+        <!-- Header -->
+        <div class="text-center mb-8 no-print">
+            <h1 class="text-4xl font-black text-blue-700 mb-2">Fysikk 2 Quiz</h1>
+            <p class="text-slate-500 font-medium">Eksamen V25 - Alle 20 flervalgsoppgaver</p>
         </div>
 
-        <div className="mb-6 bg-slate-200 h-2 rounded-full overflow-hidden">
-          <div className="bg-blue-600 h-full transition-all duration-300" style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}></div>
+        <!-- Progress Bar -->
+        <div id="progress-wrapper" class="mb-6 bg-slate-200 h-2 rounded-full overflow-hidden no-print">
+            <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 5%"></div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex gap-2">
-              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase">
-                Oppgave {currentQ.id}
-              </span>
-              <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold uppercase">
-                {currentQ.topic}
-              </span>
+        <!-- Question Card -->
+        <div id="card" class="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 card">
+            <div id="question-area">
+                <!-- Spørsmål dukker opp her -->
             </div>
-            <span className="text-slate-400 text-sm font-medium">
-              {currentStep + 1} av {questions.length}
-            </span>
-          </div>
 
-          <h2 className="text-xl font-bold text-slate-800 mb-8 leading-snug">
-            {currentQ.q}
-          </h2>
-
-          <div className="space-y-3">
-            {currentQ.opts.map((opt, i) => {
-              const letter = String.fromCharCode(65 + i);
-              const isSelected = answers[currentQ.id] === letter;
-              return (
-                <button
-                  key={letter}
-                  onClick={() => handleSelect(currentQ.id, letter)}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
-                    isSelected ? 'border-blue-600 bg-blue-50 text-blue-800' : 'border-slate-100 bg-slate-50 hover:border-slate-300'
-                  }`}
-                >
-                  <span className={`w-8 h-8 shrink-0 rounded-lg flex items-center justify-center font-bold ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                    {letter}
-                  </span>
-                  <span className="font-medium">{opt}</span>
+            <div class="mt-10 flex justify-between items-center no-print">
+                <button id="prev-btn" onclick="prevQuestion()" class="px-6 py-3 font-bold text-slate-400 hover:text-slate-800 transition-all opacity-0 pointer-events-none">
+                    ← Forrige
                 </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-10 flex justify-between items-center gap-4">
-            <button
-              disabled={currentStep === 0}
-              onClick={() => setCurrentStep(currentStep - 1)}
-              className="flex items-center gap-2 px-6 py-3 font-bold text-slate-400 hover:text-slate-800 disabled:opacity-0 transition-all"
-            >
-              <ChevronLeft size={20} /> Forrige
-            </button>
-
-            {currentStep < questions.length - 1 ? (
-              <button
-                disabled={!answers[currentQ.id]}
-                onClick={() => setCurrentStep(currentStep + 1)}
-                className="flex items-center gap-2 px-8 py-3 bg-slate-800 hover:bg-black text-white rounded-xl font-bold disabled:opacity-50 transition-all"
-              >
-                Neste <ChevronRight size={20} />
-              </button>
-            ) : (
-              <button
-                disabled={!isComplete}
-                onClick={() => setSubmitted(true)}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black shadow-lg shadow-blue-200 transition-all uppercase tracking-wider"
-              >
-                Se Resultat
-              </button>
-            )}
-          </div>
+                <button id="next-btn" onclick="nextQuestion()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-200 transition-all">
+                    Neste →
+                </button>
+            </div>
         </div>
-      </div>
     </div>
-  );
-}
+
+    <!-- Result Area (Skjult i starten) -->
+    <div id="result-area" class="hidden max-w-4xl mx-auto py-10 px-4">
+        <!-- Genereres av JS -->
+    </div>
+
+    <script>
+        const questions = [
+            { id: "a", topic: "Mekanikk", q: "En ball blir kastet skrått oppover. Vi ser bort fra luftmotstand. Hva er farten til ballen i det høyeste punktet i banen?", a: "C", opts: ["Farten er lik null.", "Farten er lik starthastigheten.", "Farten er lik den horisontale komponenten til starthastigheten.", "Farten er lik den vertikale komponenten til starthastigheten."] },
+            { id: "b", topic: "Mekanikk", q: "En ball faller vertikalt nedover. Vi tar hensyn til luftmotstand. Hva skjer med akselerasjonen til ballen etter hvert som farten øker?", a: "D", opts: ["Akselerasjonen øker.", "Akselerasjonen er konstant lik g.", "Akselerasjonen er konstant, men mindre enn g.", "Akselerasjonen avtar mot null."] },
+            { id: "c", topic: "Mekanikk", q: "En kloss ligger i ro på et skråplan. Hva er forholdet mellom friksjonskraften R og normalkraften N på klossen?", a: "B", opts: ["R = N", "R = N · tan(α) der α er helningsvinkelen.", "R = N · sin(α)", "R er alltid større enn N."] },
+            { id: "d", topic: "Mekanikk", q: "En gjenstand utfører en jevn sirkelbevegelse. Hva er retningen til akselerasjonen?", a: "B", opts: ["Langs tangenten til banen.", "Innover mot sentrum i sirkelen.", "Utover fra sentrum i sirkelen.", "Akselerasjonen er null."] },
+            { id: "e", topic: "Mekanikk", q: "En kjeglependel roterer med konstant fart. Hva er sant om summen av kreftene (ΣF) på loddet?", a: "A", opts: ["ΣF er rettet horisontalt mot sentrum i sirkelbanen.", "ΣF er null fordi farten er konstant.", "ΣF er rettet langs snora.", "ΣF er rettet vertikalt nedover."] },
+            { id: "f", topic: "Mekanikk", q: "To kuler med masse m og 2m slippes fra samme høyde. Vi ser bort fra luftmotstand. Hvilken påstand er sann?", a: "C", opts: ["Kula med masse 2m har dobbelt så stor akselerasjon.", "Kula med masse m lander først.", "Begge kulene lander samtidig med samme fart.", "Kula med masse 2m har størst fart når den lander."] },
+            { id: "g", topic: "Mekanikk", q: "En tynn homogen stang (I = 1/3 ML²) slippes fra vannrett stilling. Hva er vinkelfarten når den er vertikal?", a: "B", opts: ["ω = √(g/L)", "ω = √(3g/L)", "ω = √(2g/L)", "ω = 3g/L"] },
+            { id: "h", topic: "Feltfysikk", q: "En planet har dobbelt så stor masse som jorda og dobbelt så stor radius. Hva er feltstyrken på overflaten sammenlignet med jorda (g)?", a: "C", opts: ["2g", "g", "0,5g", "0,25g"] },
+            { id: "i", topic: "Feltfysikk", q: "Hvilken størrelse er bevart for en asteroide dersom vi kun ser på gravitasjon?", a: "A", opts: ["Mekanisk energi.", "Fart.", "Kinetisk energi.", "Potensiell energi."] },
+            { id: "j", topic: "Feltfysikk", q: "Begge ladninger dobles og avstanden dobles. Hva skjer med den elektriske kraften?", a: "B", opts: ["Den blir fire ganger større.", "Den forblir uendret.", "Den blir dobbelt så stor.", "Den halveres."] },
+            { id: "k", topic: "Feltfysikk", q: "Et elektron beveger seg mot et elektrisk felt E (motsatt retning). Hva skjer med farten?", a: "D", opts: ["Farten øker lineært.", "Farten er konstant.", "Farten øker kvadratisk.", "Farten avtar."] },
+            { id: "l", topic: "Induksjon", q: "Leder L beveger seg med fart v vinkelrett på B. Hva er indusert spenning?", a: "A", opts: ["ε = vBL", "ε = vB/L", "ε = B/vL", "ε = 0"] },
+            { id: "m", topic: "Induksjon", q: "Rotasjonsfarten til en spole dobles. Hva skjer med maksimal indusert spenning?", a: "A", opts: ["Den dobles.", "Den firedobles.", "Den forblir uendret.", "Den halveres."] },
+            { id: "n", topic: "Induksjon", q: "Hvorfor faller en magnet saktere gjennom et kobberrør?", a: "C", opts: ["Luftmotstand.", "Kobber er magnetisk.", "Induserte strømmer skaper motvirkende felt.", "Tyngdekraften er svakere i rør."] },
+            { id: "o", topic: "Moderne fysikk", q: "Hva skjer med tiden på en klokke som beveger seg med svært høy fart?", a: "B", opts: ["Klokka går fortere.", "Klokka går saktere.", "Tiden påvirkes ikke.", "Klokka stopper."] },
+            { id: "p", topic: "Moderne fysikk", q: "Ifølge generell relativitetsteori vil lys nær en massiv stjerne:", a: "A", opts: ["Bøyes av mot stjernen.", "Bevege seg rett.", "Øke farten.", "Absorberes."] },
+            { id: "q", topic: "Moderne fysikk", q: "Lys fra fjerne galakser har lengre bølgelengde enn forventet. Hva kalles det?", a: "C", opts: ["Blåforskyvning.", "Fotoelektrisk effekt.", "Rødforskyvning.", "Comptoneffekt."] },
+            { id: "r", topic: "Moderne fysikk", q: "I Comptoneffekten kolliderer foton med elektron. Hva skjer med fotonet?", a: "B", opts: ["Kortere bølgelengde.", "Lengre bølgelengde og endrer retning.", "Forsvinner.", "Beholder energi."] },
+            { id: "s", topic: "Kvantefysikk", q: "Hvilken påstand om bølgefunksjonen ψ er korrekt?", a: "D", opts: ["Viser nøyaktig posisjon.", "Er alltid reell.", "ψ² er fart.", "|ψ|² er sannsynlighetstetthet."] },
+            { id: "t", topic: "Kvantefysikk", q: "Hvilken egenskap bevises gjennom fotoelektrisk effekt?", a: "A", opts: ["Partikkelegenskap.", "Bølgeegenskap.", "Longitudinell bølge.", "Trenger medium."] }
+        ];
+
+        let currentStep = 0;
+        let answers = {};
+
+        function renderQuestion() {
+            const q = questions[currentStep];
+            const area = document.getElementById('question-area');
+            const progress = document.getElementById('progress-bar');
+            
+            progress.style.width = ((currentStep + 1) / questions.length * 100) + "%";
+
+            let html = `
+                <div class="flex justify-between items-center mb-6">
+                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Oppgave ${q.id}</span>
+                    <span class="text-slate-400 text-sm font-medium">${currentStep + 1} av ${questions.length}</span>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-8">${q.q}</h2>
+                <div class="space-y-3">
+            `;
+
+            q.opts.forEach((opt, i) => {
+                const letter = String.fromCharCode(65 + i);
+                const isSelected = answers[q.id] === letter;
+                html += `
+                    <button onclick="selectOption('${q.id}', '${letter}')" class="w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${isSelected ? 'border-blue-600 bg-blue-50 text-blue-800' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}">
+                        <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center font-bold ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}">${letter}</span>
+                        <span class="font-medium">${opt}</span>
+                    </button>
+                `;
+            });
+
+            html += `</div>`;
+            area.innerHTML = html;
+
+            // Update buttons
+            const prevBtn = document.getElementById('prev-btn');
+            if (currentStep > 0) {
+                prevBtn.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                prevBtn.classList.add('opacity-0', 'pointer-events-none');
+            }
+
+            const nextBtn = document.getElementById('next-btn');
+            if (currentStep === questions.length - 1) {
+                nextBtn.innerText = "Se Resultat";
+                nextBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            } else {
+                nextBtn.innerText = "Neste →";
+                nextBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            }
+        }
+
+        window.selectOption = function(id, letter) {
+            answers[id] = letter;
+            renderQuestion();
+        }
+
+        window.nextQuestion = function() {
+            if (!answers[questions[currentStep].id]) return;
+            if (currentStep < questions.length - 1) {
+                currentStep++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        window.prevQuestion = function() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            const resArea = document.getElementById('result-area');
+            resArea.classList.remove('hidden');
+
+            const score = questions.filter(q => answers[q.id] === q.a).length;
+            const percent = (score / questions.length) * 100;
+
+            // Analyse emner
+            const stats = {};
+            questions.forEach(q => {
+                if (!stats[q.topic]) stats[q.topic] = { total: 0, correct: 0 };
+                stats[q.topic].total++;
+                if (answers[q.id] === q.a) stats[q.topic].correct++;
+            });
+
+            let statsHtml = '';
+            for (const [topic, data] of Object.entries(stats)) {
+                const p = (data.correct / data.total) * 100;
+                statsHtml += `
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="font-bold">${topic}</span>
+                            <span>${data.correct}/${data.total} (${p.toFixed(0)}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div class="h-full ${p < 50 ? 'bg-red-500' : 'bg-green-500'}" style="width: ${p}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            resArea.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 card p-8">
+                    <div class="text-center mb-10">
+                        <h1 class="text-3xl font-black mb-2">Eksamensrapport: Fysikk 2</h1>
+                        <p class="text-slate-500">Resultat analyse - Del 1</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                        <div class="bg-slate-50 p-8 rounded-2xl text-center border border-slate-100">
+                            <p class="text-xs uppercase font-black text-slate-400 tracking-widest mb-2">Din Score</p>
+                            <p class="text-6xl font-black text-slate-800">${score}/${questions.length}</p>
+                            <p class="text-2xl font-bold text-blue-600 mt-2">${percent.toFixed(1)}%</p>
+                        </div>
+                        <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100">
+                            <p class="text-xs uppercase font-black text-slate-400 tracking-widest mb-4">Emne-analyse</p>
+                            ${statsHtml}
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 p-6 rounded-2xl mb-10 border border-blue-100">
+                        <h3 class="font-bold text-blue-800 mb-2">Vurdering:</h3>
+                        <p class="text-slate-700">${percent >= 80 ? 'Fantastisk jobba! Du er klar for eksamen.' : percent >= 50 ? 'Bra jobba, men du bør repetere emnene merket i rødt.' : 'Her må det mer lesing til. Se over pensum på nytt.'}</p>
+                    </div>
+
+                    <div class="no-print flex gap-4 mb-10">
+                        <button onclick="window.print()" class="flex-1 bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-black transition-all">Last ned PDF / Skriv ut</button>
+                        <button onclick="location.reload()" class="flex-1 bg-white border-2 border-slate-200 text-slate-700 font-bold py-4 rounded-xl hover:border-blue-500 transition-all">Prøv på nytt</button>
+                    </div>
+
+                    <h3 class="text-xl font-bold mb-6">Gjennomgang:</h3>
+                    <div class="space-y-4">
+                        ${questions.map(q => `
+                            <div class="p-4 rounded-xl border ${answers[q.id] === q.a ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                                <p class="font-bold">${q.id}) ${q.q}</p>
+                                <p class="text-sm mt-2">Ditt svar: <b>${answers[q.id] || 'Ingen'}</b> | Riktig: <b>${q.a}</b></p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Start
+        renderQuestion();
+    </script>
+
+</body>
+</html>
