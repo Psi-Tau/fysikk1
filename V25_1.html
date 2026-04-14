@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <title>Fysikk 2 – Del 1 quiz</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .oppgave {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Fysikk 2 – Del 1 (Quiz)</h1>
+<p>Velg ett svaralternativ per oppgave.</p>
+
+<form id="quiz">
+
+<div class="oppgave">
+<p><b>1)</b> En ball kastes skrått uten luftmotstand. Farten i høyeste punkt er</p>
+<label><input type="radio" name="q1" value="A"> A) 0</label><br>
+<label><input type="radio" name="q1" value="B"> B) v</label><br>
+<label><input type="radio" name="q1" value="C"> C) v·sin(α)</label><br>
+<label><input type="radio" name="q1" value="D"> D) v·cos(α)</label>
+</div>
+
+<div class="oppgave">
+<p><b>2)</b> Hvilken kraft sørger for sirkelbevegelse?</p>
+<label><input type="radio" name="q2" value="A"> A) Friksjonskraft</label><br>
+<label><input type="radio" name="q2" value="B"> B) Sentripetalkraft</label><br>
+<label><input type="radio" name="q2" value="C"> C) Tyngdekraft</label><br>
+<label><input type="radio" name="q2" value="D"> D) Normalkraft</label>
+</div>
+
+<div class="oppgave">
+<p><b>3)</b> Hva er uttrykket for kinetisk energi?</p>
+<label><input type="radio" name="q3" value="A"> A) mv</label><br>
+<label><input type="radio" name="q3" value="B"> B) mgh</label><br>
+<label><input type="radio" name="q3" value="C"> C) 1/2 mv²</label><br>
+<label><input type="radio" name="q3" value="D"> D) qE</label>
+</div>
+
+<div class="oppgave">
+<p><b>4)</b> En ladning påvirkes av et elektrisk felt. Kraften er</p>
+<label><input type="radio" name="q4" value="A"> A) qE</label><br>
+<label><input type="radio" name="q4" value="B"> B) mv²/r</label><br>
+<label><input type="radio" name="q4" value="C"> C) mgh</label><br>
+<label><input type="radio" name="q4" value="D"> D) kQq/r²</label>
+</div>
+
+<div class="oppgave">
+<p><b>5)</b> Hva skjer med tiden i et sterkt gravitasjonsfelt?</p>
+<label><input type="radio" name="q5" value="A"> A) Den går fortere</label><br>
+<label><input type="radio" name="q5" value="B"> B) Den stopper</label><br>
+<label><input type="radio" name="q5" value="C"> C) Den går saktere</label><br>
+<label><input type="radio" name="q5" value="D"> D) Den endres ikke</label>
+</div>
+
+<button type="button" onclick="rettQuiz()">Lever svar</button>
+
+</form>
+
+<p id="resultat"></p>
+
+<!-- jsPDF -->
+https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
+
+<script>
+function rettQuiz() {
+  const fasit = {
+    q1: "D",
+    q2: "B",
+    q3: "C",
+    q4: "A",
+    q5: "C"
+  };
+
+  let riktige = 0;
+  let antall = 5;
+
+  for (let spm in fasit) {
+    let valgt = document.querySelector('input[name="' + spm + '"]:checked');
+    if (valgt && valgt.value === fasit[spm]) {
+      riktige++;
+    }
+  }
+
+  document.getElementById("resultat").innerHTML =
+    "Du fikk " + riktige + " av " + antall + " riktige.";
+
+  lagPDF(riktige, antall);
+}
+
+function lagPDF(riktige, antall) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  pdf.setFontSize(16);
+  pdf.text("Fysikk 2 – Resultat", 20, 30);
+
+  pdf.setFontSize(12);
+  pdf.text("Antall riktige svar: " + riktige + " av " + antall, 20, 50);
+
+  pdf.save("fysikk2_del1_resultat.pdf");
+}
+</script>
+
+</body>
+</html>
