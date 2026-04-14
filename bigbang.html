@@ -1,12 +1,4 @@
-import React, { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Search, Shuffle, RotateCcw, ChevronLeft, ChevronRight, CheckCircle2, BookOpen, Sparkles } from "lucide-react";
-
+import React, { useEffect, useMemo, useState } from "react";
 const ALL_CARDS = [
   {
     id: 1,
@@ -21,8 +13,7 @@ const ALL_CARDS = [
     category: "Tidslinje",
     difficulty: "Lett",
     question: "Når skjedde Big Bang omtrent?",
-    answer:
-      "For omtrent 13,8 milliarder år siden.",
+    answer: "For omtrent 13,8 milliarder år siden.",
   },
   {
     id: 3,
@@ -94,7 +85,7 @@ const ALL_CARDS = [
     difficulty: "Middels",
     question: "Hva forklarer Big Bang-teorien – og hva forklarer den ikke?",
     answer:
-      "Teorien forklarer utviklingen av universet fra en tidlig, varm og tett tilstand. Den forklarer ikke sikkert hvorfor Big Bang skjedde, eller hva som eventuelt var 'før'.",
+      "Teorien forklarer utviklingen av universet fra en tidlig, varm og tett tilstand. Den forklarer ikke sikkert hvorfor Big Bang skjedde, eller hva som eventuelt var før.",
   },
   {
     id: 12,
@@ -102,7 +93,7 @@ const ALL_CARDS = [
     difficulty: "Middels",
     question: "Hvilke tre hovedobservasjoner brukes ofte som støtte for Big Bang?",
     answer:
-      "1) Rødforskyvning av lys fra galakser. 2) Kosmisk bakgrunnsstråling. 3) Fordelingen av lette grunnstoffer som hydrogen og helium.",
+      "Rødforskyvning av lys fra galakser, kosmisk bakgrunnsstråling og fordelingen av lette grunnstoffer som hydrogen og helium.",
   },
   {
     id: 13,
@@ -132,7 +123,7 @@ const ALL_CARDS = [
     id: 16,
     category: "Refleksjon",
     difficulty: "Middels",
-    question: "Hvordan kan vi 'se tilbake i tid' når vi observerer universet?",
+    question: "Hvordan kan vi se tilbake i tid når vi observerer universet?",
     answer:
       "Lys bruker tid på å reise. Når vi ser veldig langt ut i universet, ser vi objekter slik de var for lenge siden.",
   },
@@ -140,57 +131,208 @@ const ALL_CARDS = [
 
 const categories = ["Alle", ...Array.from(new Set(ALL_CARDS.map((c) => c.category)))];
 
+const styles = {
+  page: {
+    minHeight: "100vh",
+    background: "linear-gradient(180deg, #eef6ff 0%, #ffffff 50%, #f5faff 100%)",
+    color: "#0f172a",
+    fontFamily: "Inter, Arial, sans-serif",
+    padding: 16,
+    boxSizing: "border-box",
+  },
+  container: {
+    maxWidth: 1100,
+    margin: "0 auto",
+  },
+  hero: {
+    background: "linear-gradient(135deg, #0284c7 0%, #4f46e5 55%, #0f172a 100%)",
+    color: "white",
+    borderRadius: 24,
+    padding: 24,
+    boxShadow: "0 10px 30px rgba(15, 23, 42, 0.18)",
+    marginBottom: 16,
+  },
+  panel: {
+    background: "white",
+    borderRadius: 20,
+    padding: 20,
+    boxShadow: "0 6px 18px rgba(15, 23, 42, 0.08)",
+    border: "1px solid #e2e8f0",
+  },
+  row: {
+    display: "grid",
+    gridTemplateColumns: "1.5fr 0.9fr",
+    gap: 16,
+    marginBottom: 16,
+  },
+  rowMobile: {
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: 16,
+    marginBottom: 16,
+  },
+  controls: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+    alignItems: "center",
+  },
+  input: {
+    width: "100%",
+    padding: "12px 14px",
+    borderRadius: 14,
+    border: "1px solid #cbd5e1",
+    fontSize: 16,
+    outline: "none",
+    boxSizing: "border-box",
+  },
+  button: {
+    padding: "10px 14px",
+    borderRadius: 999,
+    border: "1px solid #cbd5e1",
+    background: "white",
+    color: "#0f172a",
+    cursor: "pointer",
+    fontSize: 14,
+    fontWeight: 600,
+  },
+  buttonPrimary: {
+    padding: "10px 14px",
+    borderRadius: 999,
+    border: "1px solid #0284c7",
+    background: "#0284c7",
+    color: "white",
+    cursor: "pointer",
+    fontSize: 14,
+    fontWeight: 600,
+  },
+  buttonSuccess: {
+    padding: "10px 14px",
+    borderRadius: 999,
+    border: "1px solid #059669",
+    background: "#059669",
+    color: "white",
+    cursor: "pointer",
+    fontSize: 14,
+    fontWeight: 600,
+  },
+  cardWrap: {
+    perspective: "1200px",
+    width: "100%",
+    minHeight: 360,
+  },
+  card3d: {
+    position: "relative",
+    width: "100%",
+    minHeight: 360,
+    transition: "transform 0.55s",
+    transformStyle: "preserve-3d",
+  },
+  flashSide: {
+    position: "absolute",
+    inset: 0,
+    borderRadius: 24,
+    padding: 24,
+    boxSizing: "border-box",
+    backfaceVisibility: "hidden",
+    WebkitBackfaceVisibility: "hidden",
+    boxShadow: "0 10px 24px rgba(15, 23, 42, 0.10)",
+    border: "1px solid #e2e8f0",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+  chip: {
+    display: "inline-block",
+    padding: "6px 10px",
+    borderRadius: 999,
+    background: "#e0f2fe",
+    color: "#075985",
+    fontSize: 13,
+    fontWeight: 700,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  progressOuter: {
+    width: "100%",
+    height: 12,
+    borderRadius: 999,
+    background: "#e2e8f0",
+    overflow: "hidden",
+  },
+  progressInner: {
+    height: "100%",
+    background: "linear-gradient(90deg, #0ea5e9 0%, #4f46e5 100%)",
+    borderRadius: 999,
+  },
+  sidebarGrid: {
+    display: "grid",
+    gridTemplateColumns: "1.35fr 0.65fr",
+    gap: 16,
+  },
+  sidebarGridMobile: {
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: 16,
+  },
+  muted: {
+    color: "#475569",
+  },
+  smallBox: {
+    borderRadius: 18,
+    padding: 16,
+    background: "#f8fafc",
+    border: "1px solid #e2e8f0",
+  },
+};
+
+
 function Flashcard({ card, flipped, onFlip }) {
   return (
-    <motion.div
-      className="relative h-[360px] w-full cursor-pointer [perspective:1200px]"
-      onClick={onFlip}
-      whileHover={{ scale: 1.01 }}
-      transition={{ duration: 0.2 }}
-    >
-      <motion.div
-        className="absolute inset-0"
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.5 }}
-        style={{ transformStyle: "preserve-3d" }}
+    <div style={styles.cardWrap} onClick={onFlip}>
+      <div
+        style={{
+          ...styles.card3d,
+          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+          cursor: "pointer",
+        }}
       >
-        <Card className="absolute inset-0 rounded-3xl border-slate-200 shadow-xl [backface-visibility:hidden] bg-white">
-          <CardHeader className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="rounded-full">{card.category}</Badge>
-              <Badge variant="outline" className="rounded-full">{card.difficulty}</Badge>
+        <div style={{ ...styles.flashSide, background: "#ffffff" }}>
+          <div>
+            <div>
+              <span style={styles.chip}>{card.category}</span>
+              <span style={{ ...styles.chip, background: "#f1f5f9", color: "#334155" }}>
+                {card.difficulty}
+              </span>
             </div>
-            <CardTitle className="text-2xl md:text-3xl leading-tight text-slate-900">
-              {card.question}
-            </CardTitle>
-            <CardDescription className="text-base text-slate-600">
-              Klikk for å vise svar
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex h-[220px] items-end">
-            <div className="flex items-center gap-2 text-sky-700">
-              <BookOpen className="h-5 w-5" />
-              <span className="text-sm font-medium">Øv aktiv gjenhenting: prøv å svare før du snur kortet.</span>
-            </div>
-          </CardContent>
-        </Card>
+            <h2 style={{ fontSize: 30, lineHeight: 1.2, margin: "12px 0 8px" }}>{card.question}</h2>
+            <p style={styles.muted}>Klikk for å vise svar</p>
+          </div>
+          <p style={{ color: "#0369a1", fontWeight: 600 }}>
+            Øv aktiv gjenhenting: prøv å svare før du snur kortet.
+          </p>
+        </div>
 
-        <Card className="absolute inset-0 rounded-3xl border-sky-200 shadow-xl [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-sky-50 to-indigo-50">
-          <CardHeader className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              <Badge className="rounded-full bg-sky-600 hover:bg-sky-600">Svar</Badge>
-              <Badge variant="outline" className="rounded-full border-sky-300 text-sky-800">{card.category}</Badge>
+
+        <div
+          style={{
+            ...styles.flashSide,
+            background: "linear-gradient(135deg, #f0f9ff 0%, #eef2ff 100%)",
+            transform: "rotateY(180deg)",
+            border: "1px solid #bae6fd",
+          }}
+        >
+          <div>
+            <div>
+              <span style={{ ...styles.chip, background: "#0284c7", color: "white" }}>Svar</span>
+              <span style={{ ...styles.chip, background: "#e0f2fe", color: "#075985" }}>{card.category}</span>
             </div>
-            <CardTitle className="text-xl md:text-2xl text-slate-900">
-              {card.question}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex h-[240px] items-center">
-            <p className="text-lg leading-8 text-slate-800">{card.answer}</p>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </motion.div>
+            <h3 style={{ fontSize: 24, lineHeight: 1.25, margin: "12px 0 12px" }}>{card.question}</h3>
+            <p style={{ fontSize: 18, lineHeight: 1.7, margin: 0 }}>{card.answer}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -200,6 +342,14 @@ export default function BigBangFlashcardsVG1() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [mastered, setMastered] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth < 900);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
 
   const filteredCards = useMemo(() => {
     return ALL_CARDS.filter((card) => {
@@ -214,8 +364,19 @@ export default function BigBangFlashcardsVG1() {
     });
   }, [query, category]);
 
+
+  useEffect(() => {
+    if (currentIndex > filteredCards.length - 1) {
+      setCurrentIndex(0);
+      setFlipped(false);
+    }
+  }, [filteredCards.length, currentIndex]);
+
+
   const currentCard = filteredCards[currentIndex] || null;
   const progress = filteredCards.length ? ((currentIndex + 1) / filteredCards.length) * 100 : 0;
+  const masteredInView = filteredCards.filter((card) => mastered.includes(card.id)).length;
+
 
   const goNext = () => {
     if (!filteredCards.length) return;
@@ -223,18 +384,20 @@ export default function BigBangFlashcardsVG1() {
     setCurrentIndex((prev) => (prev + 1) % filteredCards.length);
   };
 
+
   const goPrev = () => {
     if (!filteredCards.length) return;
     setFlipped(false);
     setCurrentIndex((prev) => (prev - 1 + filteredCards.length) % filteredCards.length);
   };
 
+
   const shuffleCards = () => {
-    // Pseudoshuffle by rotating to a random card in the current filtered view.
     if (!filteredCards.length) return;
     setFlipped(false);
     setCurrentIndex(Math.floor(Math.random() * filteredCards.length));
   };
+
 
   const resetAll = () => {
     setQuery("");
@@ -243,6 +406,7 @@ export default function BigBangFlashcardsVG1() {
     setFlipped(false);
     setMastered([]);
   };
+
 
   const toggleMastered = () => {
     if (!currentCard) return;
@@ -253,198 +417,142 @@ export default function BigBangFlashcardsVG1() {
     );
   };
 
-  const masteredInView = filteredCards.filter((card) => mastered.includes(card.id)).length;
-
-  React.useEffect(() => {
-    if (currentIndex > filteredCards.length - 1) {
-      setCurrentIndex(0);
-      setFlipped(false);
-    }
-  }, [filteredCards.length, currentIndex]);
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-sky-50 p-4 md:p-8">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="grid gap-4 md:grid-cols-[1.4fr_0.8fr]"
-        >
-          <Card className="rounded-[2rem] border-0 bg-gradient-to-br from-sky-600 via-indigo-600 to-slate-900 text-white shadow-2xl">
-            <CardHeader className="space-y-4 p-8">
-              <div className="flex items-center gap-3 text-sky-100">
-                <Sparkles className="h-6 w-6" />
-                <span className="text-sm font-semibold uppercase tracking-[0.2em]">Naturfag VG1</span>
+    <div style={styles.page}>
+      <div style={styles.container}>
+        <div style={isMobile ? styles.rowMobile : styles.row}>
+          <div style={styles.hero}>
+            <div style={{ letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, opacity: 0.9, fontSize: 13 }}>
+              Naturfag VG1
+            </div>
+            <h1 style={{ fontSize: isMobile ? 34 : 48, lineHeight: 1.1, margin: "10px 0 12px" }}>
+              Flashcards om Big Bang
+            </h1>
+            <p style={{ fontSize: 18, lineHeight: 1.6, margin: 0, maxWidth: 720, opacity: 0.95 }}>
+              Øv på sentrale begreper, tidslinje og observasjoner som støtter Big Bang-teorien.
+            </p>
+          </div>
+          <div style={styles.panel}>
+            <h2 style={{ marginTop: 0 }}>Fremdrift</h2>
+            <p style={{ ...styles.muted, marginTop: 0 }}>Hold oversikt over hvilke kort du kan.</p>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 14, color: "#475569" }}>
+                <span>Kort i visning</span>
+                <span>{filteredCards.length}</span>
               </div>
-              <CardTitle className="text-4xl md:text-5xl font-bold leading-tight">
-                Flashcards om Big Bang
-              </CardTitle>
-              <CardDescription className="max-w-2xl text-base md:text-lg text-sky-50/90">
-                Øv på sentrale begreper, tidslinje og observasjoner som støtter Big Bang-teorien.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+              <div style={styles.progressOuter}>
+                <div style={{ ...styles.progressInner, width: `${progress}%` }} />
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={styles.smallBox}>
+                <div style={{ fontSize: 14, color: "#64748b" }}>Plassering</div>
+                <div style={{ fontSize: 28, fontWeight: 800 }}>
+                  {filteredCards.length ? `${currentIndex + 1}/${filteredCards.length}` : "0/0"}
+                </div>
+              </div>
+              <div style={{ ...styles.smallBox, background: "#ecfdf5", border: "1px solid #a7f3d0" }}>
+                <div style={{ fontSize: 14, color: "#047857" }}>Kan disse</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: "#065f46" }}>{masteredInView}</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          <Card className="rounded-[2rem] shadow-xl border-slate-200">
-            <CardHeader>
-              <CardTitle className="text-xl">Fremdrift</CardTitle>
-              <CardDescription>Hold oversikt over hvilke kort du kan.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm text-slate-600">
-                  <span>Kort i visning</span>
-                  <span>{filteredCards.length}</span>
-                </div>
-                <Progress value={progress} className="h-3" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <div className="text-sm text-slate-500">Plassering</div>
-                  <div className="text-2xl font-bold text-slate-900">
-                    {filteredCards.length ? `${currentIndex + 1}/${filteredCards.length}` : "0/0"}
-                  </div>
-                </div>
-                <div className="rounded-2xl bg-emerald-50 p-4">
-                  <div className="text-sm text-emerald-700">Kan disse</div>
-                  <div className="text-2xl font-bold text-emerald-800">{masteredInView}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
 
-        <Card className="rounded-[2rem] shadow-lg border-slate-200">
-          <CardContent className="p-4 md:p-6">
-            <div className="grid gap-3 md:grid-cols-[1.2fr_auto] md:items-center">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Input
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    setCurrentIndex(0);
-                    setFlipped(false);
-                  }}
-                  placeholder="Søk etter begrep, bevis eller spørsmål ..."
-                  className="h-11 rounded-2xl pl-10"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((item) => (
-                  <Button
+        <div style={{ ...styles.panel, marginBottom: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1.1fr auto", gap: 12, alignItems: "center" }}>
+            <input
+              style={styles.input}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setCurrentIndex(0);
+                setFlipped(false);
+              }}
+              placeholder="Søk etter begrep, bevis eller spørsmål ..."
+            />
+            <div style={styles.controls}>
+              {categories.map((item) => {
+                const active = category === item;
+                return (
+                  <button
                     key={item}
-                    variant={category === item ? "default" : "outline"}
-                    className="rounded-full"
                     onClick={() => {
                       setCategory(item);
                       setCurrentIndex(0);
                       setFlipped(false);
                     }}
+                    style={active ? styles.buttonPrimary : styles.button}
                   >
                     {item}
-                  </Button>
-                ))}
-              </div>
+                  </button>
+                );
+              })}
             </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-          <div className="space-y-4">
+          </div>
+        </div>
+        <div style={isMobile ? styles.sidebarGridMobile : styles.sidebarGrid}>
+          <div>
             {currentCard ? (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentCard.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <Flashcard card={currentCard} flipped={flipped} onFlip={() => setFlipped((v) => !v)} />
-                </motion.div>
-              </AnimatePresence>
+              <Flashcard card={currentCard} flipped={flipped} onFlip={() => setFlipped((v) => !v)} />
             ) : (
-              <Card className="rounded-[2rem] shadow-lg">
-                <CardContent className="flex h-[360px] items-center justify-center p-8 text-center text-slate-600">
-                  Ingen kort matcher søket ditt. Prøv et annet søkeord eller velg kategorien “Alle”.
-                </CardContent>
-              </Card>
+              <div style={{ ...styles.panel, minHeight: 360, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+                Ingen kort matcher søket ditt. Prøv et annet søkeord eller velg kategorien Alle.
+              </div>
             )}
 
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[2rem] bg-white p-4 shadow-lg border border-slate-200">
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" className="rounded-2xl" onClick={goPrev}>
-                  <ChevronLeft className="mr-2 h-4 w-4" /> Forrige
-                </Button>
-                <Button variant="outline" className="rounded-2xl" onClick={() => setFlipped((v) => !v)} disabled={!currentCard}>
-                  Snur kort
-                </Button>
-                <Button variant="outline" className="rounded-2xl" onClick={goNext}>
-                  Neste <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" className="rounded-2xl" onClick={shuffleCards}>
-                  <Shuffle className="mr-2 h-4 w-4" /> Tilfeldig
-                </Button>
-                <Button
-                  className={`rounded-2xl ${currentCard && mastered.includes(currentCard.id) ? "bg-emerald-600 hover:bg-emerald-600" : ""}`}
-                  onClick={toggleMastered}
-                  disabled={!currentCard}
-                >
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                  {currentCard && mastered.includes(currentCard.id) ? "Kan denne" : "Marker som kan"}
-                </Button>
-                <Button variant="ghost" className="rounded-2xl" onClick={resetAll}>
-                  <RotateCcw className="mr-2 h-4 w-4" /> Nullstill
-                </Button>
+            <div style={{ ...styles.panel, marginTop: 16 }}>
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 10 }}>
+                <div style={styles.controls}>
+                  <button style={styles.button} onClick={goPrev}>← Forrige</button>
+                  <button style={styles.button} onClick={() => setFlipped((v) => !v)} disabled={!currentCard}>Snur kort</button>
+                  <button style={styles.button} onClick={goNext}>Neste →</button>
+                </div>
+                <div style={styles.controls}>
+                  <button style={styles.button} onClick={shuffleCards}>Tilfeldig</button>
+                  <button
+                    style={currentCard && mastered.includes(currentCard.id) ? styles.buttonSuccess : styles.buttonPrimary}
+                    onClick={toggleMastered}
+                    disabled={!currentCard}
+                  >
+                    {currentCard && mastered.includes(currentCard.id) ? "Kan denne" : "Marker som kan"}
+                  </button>
+                  <button style={styles.button} onClick={resetAll}>Nullstill</button>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <Card className="rounded-[2rem] shadow-lg border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-xl">Slik bruker du siden</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-slate-700 leading-7">
-                <p>1. Les spørsmålet og prøv å svare høyt eller skriftlig før du snur kortet.</p>
-                <p>2. Marker kort du kan, og bruk søk eller kategorier for å øve målrettet.</p>
-                <p>3. Start med begreper, gå videre til bevis, og avslutt med refleksjonsspørsmål.</p>
-              </CardContent>
-            </Card>
+          <div style={{ display: "grid", gap: 16 }}>
+            <div style={styles.panel}>
+              <h3 style={{ marginTop: 0 }}>Slik bruker du siden</h3>
+              <p>1. Les spørsmålet og prøv å svare høyt eller skriftlig før du snur kortet.</p>
+              <p>2. Marker kort du kan, og bruk søk eller kategorier for å øve målrettet.</p>
+              <p>3. Start med begreper, gå videre til bevis, og avslutt med refleksjonsspørsmål.</p>
+            </div>
 
-            <Card className="rounded-[2rem] shadow-lg border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-xl">Huskeliste til prøve</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-slate-700 leading-7">
-                <p><strong>Du bør kunne forklare:</strong></p>
-                <ul className="list-disc space-y-2 pl-5">
-                  <li>hva Big Bang-teorien sier</li>
-                  <li>at universet utvider seg</li>
-                  <li>rødforskyvning</li>
-                  <li>kosmisk bakgrunnsstråling</li>
-                  <li>hvorfor fordelingen av hydrogen og helium er viktig</li>
-                </ul>
-              </CardContent>
-            </Card>
+            <div style={styles.panel}>
+              <h3 style={{ marginTop: 0 }}>Huskeliste til prøve</h3>
+              <p><strong>Du bør kunne forklare:</strong></p>
+              <ul style={{ paddingLeft: 20, lineHeight: 1.8 }}>
+                <li>hva Big Bang-teorien sier</li>
+                <li>at universet utvider seg</li>
+                <li>rødforskyvning</li>
+                <li>kosmisk bakgrunnsstråling</li>
+                <li>hvorfor fordelingen av hydrogen og helium er viktig</li>
+              </ul>
+            </div>
 
-            <Card className="rounded-[2rem] shadow-lg border-slate-200 bg-slate-900 text-white">
-              <CardHeader>
-                <CardTitle className="text-xl">Kobling til kompetansemål</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-slate-200 leading-7">
-                <p>
-                  Denne siden trener på å beskrive Big Bang-teorien og gjøre rede for observasjoner som støtter teorien.
-                </p>
-                <p className="text-sm text-slate-300">
-                  Fint egnet til repetisjon, stasjonsundervisning eller egenøving før vurdering.
-                </p>
-              </CardContent>
-            </Card>
+            <div style={{ ...styles.panel, background: "#0f172a", color: "white", border: "1px solid #0f172a" }}>
+              <h3 style={{ marginTop: 0 }}>Kobling til kompetansemål</h3>
+              <p style={{ opacity: 0.95 }}>
+                Denne siden trener på å beskrive Big Bang-teorien og gjøre rede for observasjoner som støtter teorien.
+              </p>
+              <p style={{ opacity: 0.75, fontSize: 14 }}>
+                Fint egnet til repetisjon, stasjonsundervisning eller egenøving før vurdering.
+              </p>
+            </div>
           </div>
         </div>
       </div>
