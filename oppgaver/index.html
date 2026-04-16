@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fysikk 1: Interaktiv Portal</title>
+    <style>
+        :root { --p: #2c3e50; --a: #3498db; --success: #27ae60; --error: #c0392b; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { max-width: 800px; width: 100%; }
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-top: 8px solid var(--p); margin-bottom: 20px; }
+        
+        .question-text { font-weight: bold; margin-top: 25px; margin-bottom: 10px; font-size: 1.1rem; display: block; border-left: 4px solid var(--a); padding-left: 10px; }
+        .header-text { white-space: pre-line; margin-bottom: 15px; line-height: 1.6; }
+
+        /* Flervalg */
+        .quiz-option { 
+            display: block; width: 100%; padding: 12px; margin: 5px 0; 
+            border: 2px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer; text-align: left;
+        }
+        .correct { background: var(--success) !important; color: white; border-color: var(--success); }
+        .wrong { background: var(--error) !important; color: white; border-color: var(--error); }
+
+        /* Tekst-svar felt */
+        .fill-in-container { display: flex; gap: 10px; margin: 10px 0; }
+        .input-answer { padding: 10px; border: 2px solid #ddd; border-radius: 5px; flex-grow: 1; }
+        .btn-check { padding: 10px 15px; background: var(--p); color: white; border: none; border-radius: 5px; cursor: pointer; }
+
+        /* PDF / Layout */
+        .controls { margin-top: 30px; display: flex; gap: 10px; }
+        .btn-pdf { background: var(--a); color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .archive-section { background: #eaeff2; padding: 20px; border-radius: 10px; width: 100%; box-sizing: border-box; }
+        
+        @media print { .btn-pdf, .archive-section, .btn-check { display: none !important; } .card { box-shadow: none; border: none; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h1>Fysikk 1: Ukens Utfordring</h1>
+            <span id="status-text" style="color:var(--a); font-weight:bold;">Uke 16</span>
+            <div id="main-content">Laster...</div>
+            
+            <div class="controls">
+                <button class="btn-pdf" onclick="window.print()">Lagre som PDF</button>
+            </div>
+        </div>
+
+        <div class="archive-section">
+            <h3>Arkiv</h3>
+            <div id="archive-grid" style="display:flex; gap:10px;"></div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchTask(week) {
+            const container = document.getElementById('main-content');
+            container.innerHTML = "Henter oppgaver...";
+            try {
+                const response = await fetch(`./fys1_uke${week}.txt`);
+                const text = await response.text();
+                parseContent(text);
+            } catch (e) { container.innerHTML = "Fil ikke funnet."; }
+        }
+
+        function parseContent(text) {
+            const container = document.getElementById('main-content');
+            container.innerHTML = "";
+            const lines = text.split('\n');
+
+            lines.forEach(line => {
+                const t = line.trim();
+                if (!t) return;
+
+                // 1. FLERVALG: [ ] eller [*]
+                if (t.includes('[ ]') || t.includes('[*]')) {
+                    const isCorrect = t.includes('[*]');
+                    const btn = document.createElement('button');
+                    btn.className = 'quiz-option';
+                    btn.innerText = t.replace('[ ]','').replace('[*]','').trim();
+                    btn.onclick = () => btn.classList.add(isCorrect ? 'correct' : 'wrong');
+                    container.appendChild(btn);
+                } 
+                // 2. TEKSTSVAR: {fasit}
+                else if (t.includes('{') && t.includes('}')) {
+                    const cleanText = t.split('{')[0].trim();
+                    const correctAnswer = t.match(/\{(.*)\}/)[1].toLowerCase();
+                    
+                    const div = document.createElement('div');
+                    div.className = 'fill-in-container';
+                    div.innerHTML = `<span>${cleanText}</span> 
+                        <input type="text" class="input-answer">
+                        <button class="btn-check">Sjekk</button>`;
+                    
+                    const input = div.querySelector('input');
+                    div.querySelector('button').onclick = () => {
+                        input.style.backgroundColor = input.value.toLowerCase().trim() === correctAnswer ? '#d4edda' : '#f8d7da';
+                    };
+                    container.appendChild(div);
+                }
+                // 3. VANLIG TEKST / SPØRSMÅL
+                else {
+                    const el = document.createElement('div');
+                    el.className = t.endsWith('?') ? 'question-text' : 'header-text';
+                    el.innerText = t;
+                    container.appendChild(el);
+                }
+            });
+        }
+
+        window.onload = () => {
+            fetchTask(16);
+            // Enkel arkiv-knapp for uke 15
+            const grid = document.getElementById('archive-grid');
+            [15, 16].forEach(w => {
+                const b = document.createElement('button');
+                b.innerText = "Uke " + w;
+                b.onclick = () => fetchTask(w);
+                grid.appendChild(b);
+            });
+        };
+    </script>
+</body>
+</html>
