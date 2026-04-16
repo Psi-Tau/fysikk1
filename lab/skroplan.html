@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fysikk 2: Skråplan Simulering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f1f5f9;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        canvas {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+            width: 100%;
+            touch-action: none;
+            border: 1px solid #e2e8f0;
+        }
+        #chartCanvas {
+            height: 250px !important;
+        }
+        .sidebar {
+            height: fit-content;
+        }
+        @media (min-width: 1024px) {
+            .sidebar {
+                position: sticky;
+                top: 2rem;
+            }
+        }
+        input[type=range] {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            appearance: none;
+            cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #2563eb;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="p-4 lg:p-6">
+    <div class="max-w-[1600px] mx-auto">
+        <header class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+            <div>
+                <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Skråplan Simulering <span class="text-blue-600">Fysikk 2</span></h1>
+                <p class="text-slate-500 text-sm">Analyse av krefter, energi og bevegelsesgrafer.</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="downloadCsv" class="bg-white hover:bg-slate-50 text-slate-700 font-semibold py-2 px-4 rounded-lg border border-slate-200 transition flex items-center gap-2 text-sm shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Eksporter CSV
+                </button>
+                <button id="clearBtn" class="bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-4 rounded-lg border border-red-100 transition text-sm">
+                    Nullstill alt
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- VENSTRE: Kontrollpanel -->
+            <aside class="lg:col-span-3 space-y-4 sidebar">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Parametere</h2>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-sm font-bold text-slate-700">Vinkel (θ)</label>
+                                <span id="angleVal" class="text-sm font-mono font-bold text-blue-600 bg-blue-50 px-2 rounded">30°</span>
+                            </div>
+                            <input type="range" id="angleSlider" min="0" max="75" value="30">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-sm font-bold text-slate-700">Startfart (v₀)</label>
+                                <span id="speedVal" class="text-sm font-mono font-bold text-blue-600 bg-blue-50 px-2 rounded">5.0 m/s</span>
+                            </div>
+                            <input type="range" id="speedSlider" min="0" max="20" step="0.5" value="5">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-sm font-bold text-slate-700">Friksjon (μ)</label>
+                                <span id="frictionVal" class="text-sm font-mono font-bold text-blue-600 bg-blue-50 px-2 rounded">0.10</span>
+                            </div>
+                            <input type="range" id="frictionSlider" min="0" max="1" step="0.01" value="0.1">
+                        </div>
+                    </div>
+
+                    <div class="mt-8 space-y-3">
+                        <button id="startBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            Start Simulering
+                        </button>
+                        <button id="resetBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl transition text-sm">
+                            Tilbakestill posisjon
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Visning</h2>
+                    <div class="flex items-center justify-between py-2 border-b border-slate-50">
+                        <span class="text-sm font-semibold text-slate-700">Vis krefter</span>
+                        <input type="checkbox" id="showForces" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" checked>
+                    </div>
+                    <div class="mt-4">
+                        <label class="text-xs font-black text-slate-400 uppercase mb-2 block tracking-widest">Graftype</label>
+                        <select id="graphType" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="pos">Posisjon-tid s(t)</option>
+                            <option value="vel">Fart-tid v(t)</option>
+                        </select>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- HØYRE: Simulering og Grafer -->
+            <main class="lg:col-span-9 space-y-4">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-[10px] text-slate-400 uppercase font-black mb-1 tracking-widest">Fart (v)</p>
+                        <div class="flex items-baseline gap-1">
+                            <span id="liveSpeed" class="text-3xl font-mono font-bold text-blue-600">0.00</span>
+                            <span class="text-slate-400 text-xs font-bold">m/s</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-[10px] text-slate-400 uppercase font-black mb-1 tracking-widest">Distanse (s)</p>
+                        <div class="flex items-baseline gap-1">
+                            <span id="liveDist" class="text-3xl font-mono font-bold text-slate-800">0.00</span>
+                            <span class="text-slate-400 text-xs font-bold">m</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-[10px] text-slate-400 uppercase font-black mb-1 tracking-widest">Akselerasjon (a)</p>
+                        <div class="flex items-baseline gap-1">
+                            <span id="liveAcc" class="text-3xl font-mono font-bold text-rose-600">0.00</span>
+                            <span class="text-slate-400 text-xs font-bold">m/s²</span>
+                        </div>
+                    </div>
+                </div>
+
+                <canvas id="simCanvas"></canvas>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <canvas id="chartCanvas"></canvas>
+                </div>
+
+                <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800">
+                    <div class="px-5 py-3 border-b border-slate-800 flex justify-between items-center">
+                        <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest">Loggføring</h3>
+                    </div>
+                    <div class="max-h-40 overflow-y-auto">
+                        <table class="w-full text-sm text-left border-collapse">
+                            <thead>
+                                <tr class="text-slate-500 text-[10px] uppercase tracking-widest bg-slate-900/50">
+                                    <th class="px-5 py-3">ID</th>
+                                    <th class="px-5 py-3">θ</th>
+                                    <th class="px-5 py-3">μ</th>
+                                    <th class="px-5 py-3">v₀</th>
+                                    <th class="px-5 py-3 text-blue-400">s_maks</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logBody" class="divide-y divide-slate-800 text-slate-300 font-mono text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const g = 9.81;
+        const PIXELS_PER_METER = 45;
+        
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const chartCtx = document.getElementById('chartCanvas').getContext('2d');
+        
+        const angleSlider = document.getElementById('angleSlider');
+        const speedSlider = document.getElementById('speedSlider');
+        const frictionSlider = document.getElementById('frictionSlider');
+        const showForcesCheck = document.getElementById('showForces');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const downloadCsvBtn = document.getElementById('downloadCsv');
+        const graphTypeSelect = document.getElementById('graphType');
+        
+        const angleVal = document.getElementById('angleVal');
+        const speedVal = document.getElementById('speedVal');
+        const frictionVal = document.getElementById('frictionVal');
+        const liveSpeed = document.getElementById('liveSpeed');
+        const liveDist = document.getElementById('liveDist');
+        const liveAcc = document.getElementById('liveAcc');
+        const logBody = document.getElementById('logBody');
+
+        let state = {
+            running: false,
+            angle: 30,
+            v0: 5,
+            mu: 0.1,
+            time: 0,
+            posX: 0,
+            velocity: 0,
+            acceleration: 0,
+            history: [], // Beholder data for alle forsøk
+            currentTrialData: [], // Midlertidig data for pågående forsøk
+            trialCount: 0
+        };
+
+        let chart;
+
+        function initChart() {
+            chart = new Chart(chartCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Data',
+                        data: [],
+                        borderColor: '#2563eb',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: true,
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    scales: {
+                        x: { display: true, title: { display: true, text: 'Tid (s)', font: { weight: 'bold' } } },
+                        y: { display: true, title: { display: true, text: 'Verdi', font: { weight: 'bold' } } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateChart() {
+            const type = graphTypeSelect.value;
+            chart.data.labels = state.currentTrialData.map(d => d.tid);
+            chart.data.datasets[0].data = state.currentTrialData.map(d => type === 'pos' ? d.dist : d.fart);
+            chart.data.datasets[0].label = type === 'pos' ? 'Posisjon s(t)' : 'Fart v(t)';
+            chart.options.scales.y.title.text = type === 'pos' ? 'Posisjon (m)' : 'Fart (m/s)';
+            chart.data.datasets[0].borderColor = type === 'pos' ? '#1e293b' : '#2563eb';
+            chart.update();
+        }
+
+        function resize() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 320;
+            draw();
+        }
+        window.addEventListener('resize', resize);
+        resize();
+        initChart();
+
+        function updateInputs() {
+            state.angle = parseFloat(angleSlider.value);
+            state.v0 = parseFloat(speedSlider.value);
+            state.mu = parseFloat(frictionSlider.value);
+            angleVal.innerText = state.angle + "°";
+            speedVal.innerText = state.v0.toFixed(1) + " m/s";
+            frictionVal.innerText = state.mu.toFixed(2);
+            if (!state.running) {
+                state.velocity = state.v0;
+                calculatePhysics();
+                draw();
+            }
+        }
+
+        [angleSlider, speedSlider, frictionSlider].forEach(s => s.addEventListener('input', updateInputs));
+        graphTypeSelect.addEventListener('change', updateChart);
+
+        function calculatePhysics() {
+            const rad = state.angle * Math.PI / 180;
+            const Gx = g * Math.sin(rad);
+            const Gy = g * Math.cos(rad);
+            let frictionAcc = state.mu * Gy;
+            
+            if (Math.abs(state.velocity) < 0.05 && Math.abs(Gx) <= frictionAcc) {
+                state.acceleration = 0;
+                state.velocity = 0;
+                if (state.running && state.time > 0.1) stopSimulation();
+            } else {
+                const frictionDir = state.velocity >= 0 ? -1 : 1;
+                state.acceleration = -Gx + (frictionDir * frictionAcc);
+            }
+        }
+
+        function startSimulation() {
+            if (state.running) return;
+            state.trialCount++;
+            state.running = true;
+            state.time = 0;
+            state.posX = 0;
+            state.velocity = state.v0;
+            state.currentTrialData = [];
+            startBtn.disabled = true;
+            startBtn.classList.add('opacity-50');
+            animate();
+        }
+
+        function stopSimulation() {
+            state.running = false;
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+            
+            const maxDist = state.currentTrialData.length > 0 
+                ? Math.max(...state.currentTrialData.map(d => parseFloat(d.dist))) 
+                : 0;
+
+            state.history.push({
+                trial: state.trialCount,
+                v0: state.v0,
+                angle: state.angle,
+                mu: state.mu,
+                maxDist: maxDist.toFixed(2),
+                fullData: [...state.currentTrialData]
+            });
+            updateLogTable();
+        }
+
+        function resetSimulation() {
+            state.running = false;
+            state.time = 0;
+            state.posX = 0;
+            state.velocity = state.v0;
+            state.currentTrialData = [];
+            updateChart();
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+            updateInputs();
+            draw();
+        }
+
+        function updateLogTable() {
+            logBody.innerHTML = state.history.slice(-10).reverse().map(t => `
+                <tr class="border-b border-slate-800 hover:bg-slate-800/50">
+                    <td class="px-5 py-2">#${t.trial}</td>
+                    <td class="px-5 py-2">${t.angle}°</td>
+                    <td class="px-5 py-2">${t.mu}</td>
+                    <td class="px-5 py-2">${t.v0}</td>
+                    <td class="px-5 py-2 text-blue-400 font-bold">${t.maxDist}m</td>
+                </tr>
+            `).join('');
+        }
+
+        function animate() {
+            if (!state.running) return;
+            const dt = 0.016;
+            calculatePhysics();
+            state.velocity += state.acceleration * dt;
+            state.posX += state.velocity * dt;
+            state.time += dt;
+
+            // Lagrer punktet for graf og CSV
+            state.currentTrialData.push({
+                trial: state.trialCount,
+                tid: state.time.toFixed(3),
+                vinkel: state.angle,
+                mu: state.mu,
+                fart: state.velocity.toFixed(3),
+                dist: state.posX.toFixed(3),
+                aks: state.acceleration.toFixed(3)
+            });
+
+            if (state.posX < -0.1 || state.posX > 35) stopSimulation();
+            if (state.time > 0.2 && state.posX <= 0 && state.velocity < 0) {
+                state.posX = 0;
+                state.velocity = 0;
+                stopSimulation();
+            }
+
+            if (state.currentTrialData.length % 3 === 0) updateChart();
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const rad = state.angle * Math.PI / 180;
+            const pivotX = 80;
+            const pivotY = canvas.height - 60;
+            const planeLen = canvas.width - 160;
+
+            ctx.beginPath();
+            ctx.moveTo(0, pivotY);
+            ctx.lineTo(canvas.width, pivotY);
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const endX = pivotX + Math.cos(rad) * planeLen;
+            const endY = pivotY - Math.sin(rad) * planeLen;
+            ctx.beginPath();
+            ctx.moveTo(pivotX, pivotY);
+            ctx.lineTo(endX, endY);
+            ctx.lineTo(endX, pivotY);
+            ctx.fillStyle = '#f8fafc';
+            ctx.fill();
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            if (state.angle > 2) {
+                ctx.beginPath();
+                ctx.arc(pivotX, pivotY, 40, 0, -rad, true);
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = '#2563eb';
+                ctx.font = "bold 12px Inter";
+                ctx.fillText(state.angle + "°", pivotX + 45, pivotY - 10);
+            }
+
+            const visualDist = state.posX * PIXELS_PER_METER;
+            const carX = pivotX + Math.cos(rad) * visualDist;
+            const carY = pivotY - Math.sin(rad) * visualDist;
+
+            ctx.save();
+            ctx.translate(carX, carY);
+            ctx.rotate(-rad);
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(-20, -24, 40, 18);
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath(); ctx.arc(-12, -4, 6, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(12, -4, 6, 0, Math.PI*2); ctx.fill();
+
+            if (showForcesCheck.checked) {
+                const s = 12;
+                const cosA = Math.cos(rad);
+                ctx.restore(); ctx.save();
+                ctx.translate(carX, carY - 15);
+                drawArrow(0, 0, 0, g * s, '#e11d48', 'G');
+                ctx.rotate(-rad);
+                drawArrow(0, 0, 0, -g * cosA * s, '#10b981', 'N');
+                const frictionMag = state.mu * g * cosA * s;
+                if (frictionMag > 0.5) {
+                    const dir = state.velocity >= 0 ? 1 : -1;
+                    drawArrow(0, 0, dir * frictionMag, 0, '#f59e0b', 'f');
+                }
+            }
+            ctx.restore();
+
+            liveSpeed.innerText = state.velocity.toFixed(2);
+            liveDist.innerText = state.posX.toFixed(2);
+            liveAcc.innerText = state.acceleration.toFixed(2);
+        }
+
+        function drawArrow(x, y, dx, dy, color, label) {
+            const h = 8;
+            const x2 = x + dx; const y2 = y + dy;
+            const angle = Math.atan2(dy, dx);
+            ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x2, y2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - h * Math.cos(angle - Math.PI/6), y2 - h * Math.sin(angle - Math.PI/6));
+            ctx.lineTo(x2 - h * Math.cos(angle + Math.PI/6), y2 - h * Math.sin(angle + Math.PI/6));
+            ctx.fill();
+            ctx.font = "bold 11px Inter";
+            ctx.fillText(label, x2 + (dx > 0 ? 5 : -12), y2 + (dy > 0 ? 12 : -5));
+        }
+
+        // CSV Eksport funksjon
+        function downloadCSV() {
+            if (state.history.length === 0 && state.currentTrialData.length === 0) {
+                alert("Ingen data å eksportere. Kjør en simulering først.");
+                return;
+            }
+
+            let csvRows = ["Forsok,Tid(s),Vinkel(deg),Friksjon(mu),Fart(m/s),Distanse(m),Akselerasjon(m/s2)"];
+            
+            // Henter data fra alle fullførte forsøk
+            state.history.forEach(trial => {
+                trial.fullData.forEach(row => {
+                    csvRows.push(`${row.trial},${row.tid},${row.vinkel},${row.mu},${row.fart},${row.dist},${row.aks}`);
+                });
+            });
+
+            // Legger også til data fra det pågående forsøket hvis det finnes
+            if (state.running) {
+                state.currentTrialData.forEach(row => {
+                    csvRows.push(`${row.trial},${row.tid},${row.vinkel},${row.mu},${row.fart},${row.dist},${row.aks}`);
+                });
+            }
+
+            const csvString = csvRows.join("\n");
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `skraaplan_data_${new Date().getTime()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        startBtn.addEventListener('click', startSimulation);
+        resetBtn.addEventListener('click', resetSimulation);
+        clearBtn.addEventListener('click', () => { if(confirm("Nullstille alt?")) location.reload(); });
+        downloadCsvBtn.addEventListener('click', downloadCSV);
+        
+        updateInputs();
+    </script>
+</body>
+</html>
