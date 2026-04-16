@@ -1,0 +1,21 @@
+TEMA: ELEKTRISITET OG KRAFT
+
+1. Flervalg: Hva skjer med motstanden i en leder hvis lengden dobles?
+[ ] Motstanden halveres
+[*] Motstanden dobles
+[ ] Motstanden forblir uendret
+
+2. Fyll inn: Hva er symbolet for enheten Ohm? {omega}
+
+3. Sant eller usant: Strømmen er den samme overalt i en seriekobling?
+[*] Sant
+[ ] Usant
+
+4. Beregning: En krets har 10V og 2A. Hva er effekten i Watt? {20}
+
+5. Begrep: Hva kaller vi materialer som ikke leder strøm?
+[ ] Halvledere
+[*] Isolatorer
+[ ] Superledere
+
+6. Fyll inn: Hvilken farge har vanligvis jordlederen i et støpsel? {gulgrønn}

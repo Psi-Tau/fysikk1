@@ -1,0 +1,25 @@
+TEMA: MEKANIKK OG NEWTONS LOVER
+
+1. Begrep: Hva kalles motstanden en gjenstand har mot å endre sin bevegelsestilstand?
+[*] Treghet
+[ ] Akselerasjon
+[ ] Friksjon
+
+2. Fyll inn: Newtons 2. lov skrives ofte som F = m * a. Hva står bokstaven 'a' for? {akselerasjon}
+
+3. Sant eller usant: Hvis summen av kreftene på en gjenstand er null, må gjenstanden ligge i ro.
+[ ] Sant
+[*] Usant
+
+(Forklaring: Den kan også bevege seg med konstant fart i en rett linje!)
+
+4. Beregning: En kraft på 50 N virker på en gjenstand med masse 5 kg. Hva blir akselerasjonen i m/s²? {10}
+
+5. Flervalg: Hvilken vei peker alltid friksjonen på en gjenstand som glir bortover et gulv?
+[ ] Oppover
+[ ] Samme vei som farten
+[*] Motsatt vei av farten
+
+6. Fyll inn: Hva er enheten for kraft? {newton}
+
+7. Tyngdekraft: En person veier 70 kg på jorda. Hvor stor er tyngdekraften (G) som virker på personen? (Bruk g = 9.81) {686.7}
