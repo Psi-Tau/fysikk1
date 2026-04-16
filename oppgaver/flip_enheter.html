@@ -69,7 +69,7 @@
 
         .card-container {
             perspective: 1000px;
-            height: 400px;
+            height: 420px;
             width: 100%;
         }
 
@@ -120,11 +120,12 @@
         }
 
         .question-text {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 500;
             flex-grow: 1;
             display: flex;
             align-items: center;
+            line-height: 1.5;
         }
 
         .answer-area {
@@ -140,13 +141,16 @@
             font-size: 1rem;
             outline: none;
             transition: border-color 0.2s;
+            box-sizing: border-box;
         }
 
         input[type="text"]:focus { border-color: var(--primary); }
 
         .feedback-content {
-            font-size: 1.1rem;
+            font-size: 1rem;
             line-height: 1.6;
+            overflow-y: auto;
+            max-height: 250px;
         }
 
         .loader {
@@ -169,31 +173,39 @@
             border-radius: 1rem;
             color: #64748b;
         }
+        
+        .error-msg {
+            color: #ef4444;
+            background: #fef2f2;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Fysikk 2: Enhetstrener</h1>
-        <p>Øv på krevende enhetsutledninger. Velg et emne, skriv svaret ditt, og la kunstig intelligens vurdere nøyaktigheten din.</p>
+        <p>Øv på krevende enheter i fysikk. Velg en kategori for å generere tre unike oppgaver med kunstig intelligens.</p>
     </header>
 
     <div class="topic-selector">
-        <button class="btn" onclick="initTopic('Mekanikk')">Mekanikk</button>
-        <button class="btn" onclick="initTopic('Felt')">Felt</button>
-        <button class="btn" onclick="initTopic('Induksjon')">Induksjon</button>
+        <button class="btn" onclick="initTopic('Laboppgaver')">Laboppgaver</button>
+        <button class="btn" onclick="initTopic('Oppgaver')">Oppgaver</button>
+        <button class="btn" onclick="initTopic('Annet')">Annet</button>
     </div>
 
     <div class="flashcards-grid" id="grid">
-        <!-- Placeholder cards -->
         <div class="empty-state">
-            Klikk på et emne over for å generere oppgaver...
+            Klikk på en kategori over for å generere oppgaver...
         </div>
     </div>
 
     <script>
         // --- KONFIGURASJON ---
-        const apiKey = ""; // <--- SETT INN DIN API-NØKKEL HER
+        const apiKey = ""; // API-nøkkel injiseres automatisk her ved kjøring
 
         // --- KI-FUNKSJON MED RETRY-LOGIKK ---
         async function callGemini(prompt) {
@@ -223,33 +235,37 @@
                     return text;
 
                 } catch (error) {
-                    console.error(`Forsøk ${i + 1} feilet: ${error.message}`);
                     if (i === maxAttempts - 1) throw error;
-                    
                     await new Promise(res => setTimeout(res, delay));
-                    delay *= 2; // Eksponentiell backoff
+                    delay *= 2;
                 }
             }
         }
 
         // --- APPLIKASJONSLOGIKK ---
-        let currentTopic = "";
-
-        async function initTopic(topic) {
+        async function initTopic(category) {
             const grid = document.getElementById('grid');
-            grid.innerHTML = '<div class="empty-state"><div class="loader"></div> Lager fysikkoppgaver for ' + topic + '...</div>';
-            currentTopic = topic;
+            grid.innerHTML = '<div class="empty-state"><div class="loader"></div> Lager spørsmål for ' + category + '...</div>';
 
-            const prompt = `Du er en fysikklærer i videregående skole. Lag 3 korte spørsmål om enheter i Fysikk 2 innen temaet ${topic}. 
-            Spørsmålene skal handle om å uttrykke enheter ved hjelp av andre (f.eks. "Uttrykk Henry ved SI-grunnenheter" eller "Hvilken enhet får vi om vi multipliserer magnetisk flukstetthet med areal?").
-            Svar kun med de 3 spørsmålene separert med tegnet "###". Ikke ha med tall eller introduksjonstekst.`;
+            const prompt = `Du er en fysikklærer. Lag 3 korte spørsmål om enheter i Fysikk 2 som passer under kategorien "${category}". 
+            ${category === 'Laboppgaver' ? 'Fokuser på enheter brukt i målinger, usikkerhet og utstyr.' : ''}
+            ${category === 'Oppgaver' ? 'Fokuser på komplekse enhetsutledninger fra teoretiske oppgaver (f.eks. magnetisme, induksjon, felt).' : ''}
+            ${category === 'Annet' ? 'Lag varierte spørsmål om SI-systemet og sammensatte enheter i fysikk.' : ''}
+            Svar KUN med de 3 spørsmålene separert med tegnet "###". Ingen tall eller intro.`;
 
             try {
                 const response = await callGemini(prompt);
                 const questions = response.split('###').map(q => q.trim()).filter(q => q.length > 5);
                 renderCards(questions);
             } catch (err) {
-                grid.innerHTML = `<div class="empty-state" style="color: #ef4444;">Feil ved henting av oppgaver: ${err.message}. Sjekk om API-nøkkelen er lagt inn.</div>`;
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="error-msg">
+                            <strong>Feil ved henting:</strong><br>
+                            ${err.message}<br><br>
+                            Prøv å laste siden på nytt eller sjekk at API-nøkkelen er korrekt konfigurert.
+                        </div>
+                    </div>`;
             }
         }
 
@@ -278,7 +294,7 @@
                                 <div class="loader"></div>
                                 Tenker...
                             </div>
-                            <button class="btn" style="margin-top: 2rem; background: transparent; border: 1px solid var(--primary); color: var(--primary)" onclick="flipCard(${i})">Se spørsmål igjen</button>
+                            <button class="btn" style="margin-top: 1.5rem; background: transparent; border: 1px solid var(--primary); color: var(--primary)" onclick="flipCard(${i})">Se spørsmål igjen</button>
                         </div>
                     </div>
                 `;
@@ -293,23 +309,19 @@
 
             if (!answer) return;
 
-            // Flipp kortet med en gang for å vise laste-tilstand
             flipCard(index);
+            feedbackBox.innerHTML = '<div class="loader"></div> Analyserer svaret...';
 
-            const prompt = `Du er en sensor i Fysikk 2. 
+            const prompt = `Som fysikklærer, vurder dette svaret.
             Spørsmål: "${question}"
             Elevens svar: "${answer}"
-            
-            Vurder om svaret er korrekt. Gi en svært kort forklaring (maks 2 setninger). 
-            Bruk LaTeX-formatering for formler (f.eks. $kg \cdot m/s^2$). 
-            Vær streng på enhetene.`;
+            Svar kort (maks 3 setninger). Bekreft om det er korrekt. Bruk standard tegn for enheter.`;
 
             try {
                 const feedback = await callGemini(prompt);
-                // Enkel håndtering av eventuell LaTeX (her vises det som tekst, men i en full app ville vi brukt MathJax)
                 feedbackBox.innerHTML = feedback;
             } catch (err) {
-                feedbackBox.innerHTML = "Kunne ikke hente tilbakemelding. " + err.message;
+                feedbackBox.innerHTML = '<div class="error-msg">Kunne ikke hente vurdering.</div>';
             }
         }
 
