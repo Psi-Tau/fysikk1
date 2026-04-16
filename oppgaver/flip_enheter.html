@@ -8,10 +8,10 @@
         :root {
             --primary: #2563eb;
             --primary-dark: #1e40af;
-            --bg: #f1f5f9;
+            --bg: #f8fafc;
             --text: #0f172a;
             --card-front: #ffffff;
-            --card-back: #eff6ff;
+            --card-back: #f0f9ff;
         }
 
         body {
@@ -23,13 +23,13 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 2rem;
+            padding: 1rem;
         }
 
         #setup-screen {
             position: fixed;
             inset: 0;
-            background: var(--bg);
+            background: white;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -38,86 +38,71 @@
 
         .setup-card {
             background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
             text-align: center;
-            max-width: 400px;
+            max-width: 450px;
             width: 90%;
+            border: 1px solid #e2e8f0;
         }
 
-        .setup-card input {
+        input {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.8rem;
             margin: 1rem 0;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.6rem;
             box-sizing: border-box;
-            font-family: monospace;
+            font-size: 1rem;
         }
 
         #app-content {
             display: none; 
             width: 100%;
-            max-width: 1100px;
+            max-width: 1000px;
             flex-direction: column;
-            align-items: center;
         }
 
-        header {
-            text-align: center;
-            max-width: 800px;
-            margin-bottom: 3rem;
-        }
-
-        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary); }
-        p { color: #64748b; font-size: 1.1rem; }
+        header { text-align: center; margin-bottom: 2rem; }
+        h1 { color: var(--primary); margin-bottom: 0.5rem; }
 
         .topic-selector {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 3rem;
-            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 0.75rem 1.5rem;
+            padding: 0.8rem 1.5rem;
             border: none;
-            border-radius: 0.5rem;
+            border-radius: 0.6rem;
             background-color: var(--primary);
             color: white;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1rem;
+            transition: 0.2s;
         }
 
-        .btn:hover { background-color: var(--primary-dark); transform: translateY(-2px); }
+        .btn:hover { background-color: var(--primary-dark); transform: translateY(-1px); }
 
         .flashcards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-            width: 100%;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
         }
 
-        .card-container {
-            perspective: 1000px;
-            height: 420px;
-            width: 100%;
-        }
-
+        .card-container { perspective: 1000px; height: 380px; }
         .card {
             position: relative;
             width: 100%;
             height: 100%;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            cursor: default;
         }
-
         .card.is-flipped { transform: rotateY(180deg); }
 
         .card-face {
@@ -125,91 +110,43 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            display: flex;
-            flex-direction: column;
+            border-radius: 1rem;
             padding: 2rem;
             box-sizing: border-box;
-            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             border: 1px solid #e2e8f0;
-        }
-
-        .card-front {
-            background-color: var(--card-front);
-            justify-content: space-between;
-        }
-
-        .card-back {
-            background-color: var(--card-back);
-            transform: rotateY(180deg);
-            justify-content: center;
-            text-align: center;
-        }
-
-        .question-label {
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--primary);
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .question-text {
-            font-size: 1.1rem;
-            font-weight: 500;
-            flex-grow: 1;
             display: flex;
-            align-items: center;
-            line-height: 1.5;
+            flex-direction: column;
         }
 
-        .answer-area {
-            margin-top: 1.5rem;
-        }
+        .card-front { background: var(--card-front); }
+        .card-back { background: var(--card-back); transform: rotateY(180deg); text-align: center; justify-content: center; }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 0.5rem;
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-            outline: none;
-            box-sizing: border-box;
-        }
+        .q-label { font-weight: 800; color: var(--primary); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem; }
+        .q-text { font-size: 1.1rem; flex-grow: 1; display: flex; align-items: center; }
 
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
-            margin: 1rem auto;
+            margin: auto;
         }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 4rem;
-            border: 2px dashed #cbd5e1;
-            border-radius: 1rem;
-            color: #64748b;
-        }
-        
         .error-msg {
-            color: #ef4444;
             background: #fef2f2;
-            padding: 1.5rem;
+            color: #b91c1c;
+            padding: 1rem;
             border-radius: 0.5rem;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            text-align: left;
             border: 1px solid #fee2e2;
-            max-width: 100%;
-            word-break: break-all;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            text-align: left;
+            overflow-wrap: break-word;
         }
     </style>
 </head>
@@ -217,169 +154,136 @@
 
     <div id="setup-screen">
         <div class="setup-card">
-            <h3>Fysikk 2 Øving</h3>
-            <p style="font-size: 0.9rem;">Lim inn din Gemini API-nøkkel for å starte.</p>
-            <input type="password" id="api-key-input" placeholder="Lim inn nøkkel (AIza...)">
-            <button class="btn" style="width:100%" onclick="confirmKey()">Bekreft Nøkkel</button>
+            <h2>Fysikk 2 Enhetstrener</h2>
+            <p>Skriv inn din Google API-nøkkel.</p>
+            <input type="password" id="api-key-input" placeholder="AIzaSy...">
+            <button class="btn" style="width:100%" onclick="startApp()">Start øving</button>
+            <p id="setup-error" style="color:red; font-size:0.8rem; margin-top:10px; display:none;">Nøkkelen er for kort.</p>
         </div>
     </div>
 
     <div id="app-content">
         <header>
-            <h1>Enhetstrener: Fysikk 2</h1>
-            <p>Generer oppgaver om enheter innen mekanikk, felt og induksjon.</p>
+            <h1>Enhetstrener</h1>
+            <p>Mekanikk, Felt og Induksjon</p>
         </header>
 
         <div class="topic-selector">
-            <button class="btn" onclick="initTopic('Mekanikk')">Mekanikk</button>
-            <button class="btn" onclick="initTopic('Felt')">Felt</button>
-            <button class="btn" onclick="initTopic('Induksjon')">Induksjon</button>
+            <button class="btn" onclick="loadQuestions('Mekanikk')">Mekanikk</button>
+            <button class="btn" onclick="loadQuestions('Felt')">Felt</button>
+            <button class="btn" onclick="loadQuestions('Induksjon')">Induksjon</button>
         </div>
 
         <div id="grid" class="flashcards-grid">
-            <div class="empty-state">Velg et emne for å generere oppgaver...</div>
+            <div style="grid-column: 1/-1; text-align: center; color: #64748b; padding-top: 3rem;">
+                Velg et emne for å generere oppgaver...
+            </div>
         </div>
     </div>
 
     <script>
-        let apiKey = "";
+        let KEY = "";
 
-        function confirmKey() {
-            const input = document.getElementById('api-key-input');
-            const val = input.value.trim();
-            if (val.length > 10) {
-                apiKey = val;
-                document.getElementById('setup-screen').style.display = 'none';
-                document.getElementById('app-content').style.display = 'flex';
+        function startApp() {
+            const input = document.getElementById('api-key-input').value.trim();
+            if (input.length < 20) {
+                document.getElementById('setup-error').style.display = 'block';
+                return;
             }
+            KEY = input;
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('app-content').style.display = 'flex';
         }
 
-        async function callGemini(prompt) {
-            // Bruker v1beta for Gemini 2.5 Flash
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        async function safeFetchKI(prompt) {
+            // Vi bruker en ren URL uten ekstra parametere
+            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=" + KEY;
             
-            let delay = 1000;
-            const maxAttempts = 5;
+            // Definerer payloaden eksplisitt for å unngå at Canvas-systemer legger til "ExCatalogTypeName"
+            const payload = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            };
 
-            for (let i = 0; i < maxAttempts; i++) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }]
-                        })
-                    });
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                // Viktig: Vi sender KUN payloaden vi har definert
+                body: JSON.stringify(payload)
+            });
 
-                    const data = await response.json();
+            const data = await response.json();
 
-                    if (!response.ok) {
-                        // Kaster en detaljert feilmelding fra API-et
-                        const msg = data.error?.message || response.statusText;
-                        const code = data.error?.status || response.status;
-                        throw new Error(`[${code}] ${msg}`);
-                    }
-
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (!text) throw new Error("KI returnerte et tomt svar.");
-                    
-                    return text;
-
-                } catch (error) {
-                    if (i === maxAttempts - 1) throw error;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                }
+            if (!response.ok) {
+                const errorDetail = data.error ? `${data.error.status}: ${data.error.message}` : response.statusText;
+                throw new Error(errorDetail);
             }
+
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
         }
 
-        async function initTopic(category) {
+        async function loadQuestions(topic) {
             const grid = document.getElementById('grid');
-            grid.innerHTML = '<div class="empty-state"><div class="loader"></div> Lager oppgaver om ' + category + '...</div>';
+            grid.innerHTML = '<div style="grid-column:1/-1; text-align:center;"><div class="loader"></div><p>Henter spørsmål om ' + topic + '...</p></div>';
 
-            const prompt = `Lag 3 utfordrende spørsmål om fysikkenheter for emnet "${category}" i Fysikk 2. 
-            Fokus: SI-enheter og sammensatte enheter. 
-            Mekanikk: Kraft, energi, impuls. 
-            Felt: Elektriske og magnetiske felt (Tesla, Volt/meter). 
-            Induksjon: Fluks (Weber), ems, induktans.
-            Svar kun med de 3 spørsmålene adskilt med "###". Ingen tall eller tekst før/etter.`;
+            const prompt = `Du er en fysikklærer. Lag 3 korte og presise spørsmål om enheter i temaet "${topic}" for Fysikk 2. 
+            Svar kun med de 3 spørsmålene adskilt med "###". Ingen introduksjon.`;
 
             try {
-                const response = await callGemini(prompt);
-                const questions = response.split('###').map(q => q.trim()).filter(q => q.length > 5);
-                renderCards(questions);
-            } catch (err) {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <div class="error-msg">
-                            <strong>Det oppstod en feil:</strong><br>
-                            ${err.message}<br><br>
-                            <em>Hvis feilen inneholder "403" eller "API_KEY_INVALID", er nøkkelen feil. Hvis den er tom, kan det være at Canvas blokkerer forespørselen.</em>
+                const text = await safeFetchKI(prompt);
+                const qArray = text.split('###').map(s => s.trim()).filter(s => s.length > 5);
+                
+                grid.innerHTML = '';
+                qArray.slice(0, 3).forEach((q, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'card-container';
+                    div.innerHTML = `
+                        <div class="card" id="card-${i}">
+                            <div class="card-face card-front">
+                                <div class="q-label">Spørsmål ${i+1}</div>
+                                <div class="q-text">${q}</div>
+                                <div style="margin-top:1rem;">
+                                    <input type="text" id="ans-${i}" placeholder="Ditt svar..." onkeypress="if(event.key==='Enter') check(${i}, '${q.replace(/'/g, "\\'")}')">
+                                    <button class="btn" style="width:100%" onclick="check(${i}, '${q.replace(/'/g, "\\'")}')">Sjekk svar</button>
+                                </div>
+                            </div>
+                            <div class="card-face card-back">
+                                <div class="q-label">Vurdering</div>
+                                <div id="feedback-${i}" style="font-size:0.95rem; line-height:1.4;"></div>
+                                <button class="btn" style="margin-top:1.5rem; background:#cbd5e1; color:#334155" onclick="flip(${i})">Tilbake</button>
+                            </div>
                         </div>
-                    </div>`;
+                    `;
+                    grid.appendChild(div);
+                });
+            } catch (err) {
+                grid.innerHTML = `<div class="error-msg"><strong>Feil:</strong> ${err.message}<br><br>Dette skyldes ofte restriksjoner i Canvas-nettverket eller API-nøkkelen.</div>`;
             }
         }
 
-        function renderCards(questions) {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-
-            questions.slice(0, 3).forEach((q, i) => {
-                const cardWrapper = document.createElement('div');
-                cardWrapper.className = 'card-container';
-                const escapedQ = q.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                
-                cardWrapper.innerHTML = `
-                    <div class="card" id="card-${i}">
-                        <div class="card-face card-front">
-                            <div>
-                                <div class="question-label">Spørsmål ${i + 1}</div>
-                                <div class="question-text">${q}</div>
-                            </div>
-                            <div class="answer-area">
-                                <input type="text" id="input-${i}" placeholder="Svar her..." onkeypress="if(event.key==='Enter') evaluateAnswer(${i}, '${escapedQ}')">
-                                <button class="btn" style="width: 100%" onclick="evaluateAnswer(${i}, '${escapedQ}')">Sjekk svar</button>
-                            </div>
-                        </div>
-                        <div class="card-face card-back">
-                            <div class="question-label">Vurdering</div>
-                            <div id="feedback-${i}" class="feedback-content">
-                                <div class="loader"></div>
-                            </div>
-                            <button class="btn" style="margin-top: 1rem; background: transparent; border: 1px solid var(--primary); color: var(--primary)" onclick="flipCard(${i})">Se spørsmål</button>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(cardWrapper);
-            });
-        }
-
-        async function evaluateAnswer(index, question) {
-            const input = document.getElementById(`input-${index}`);
-            const feedbackBox = document.getElementById(`feedback-${index}`);
-            const answer = input.value.trim();
-
+        async function check(id, question) {
+            const answer = document.getElementById(`ans-${id}`).value;
             if (!answer) return;
 
-            flipCard(index);
-            feedbackBox.innerHTML = '<div class="loader"></div>';
+            flip(id);
+            const feedbackElem = document.getElementById(`feedback-${id}`);
+            feedbackElem.innerHTML = '<div class="loader"></div>';
 
-            const prompt = `Som fysikklærer, vurder kort om dette svaret på enhetsoppgaven er riktig. 
-            Oppgave: "${question}" 
-            Svar: "${answer}" 
-            Svar med maks to korte setninger.`;
+            const prompt = `Spørsmål: "${question}". Elevens svar: "${answer}". Er dette korrekt enhetsbruk i fysikk? Svar kort (maks 25 ord).`;
 
             try {
-                const feedback = await callGemini(prompt);
-                feedbackBox.innerHTML = feedback;
+                const result = await safeFetchKI(prompt);
+                feedbackElem.innerHTML = result;
             } catch (err) {
-                feedbackBox.innerHTML = 'Kunne ikke vurdere svar: ' + err.message;
+                feedbackElem.innerHTML = "Kunne ikke hente vurdering.";
             }
         }
 
-        function flipCard(index) {
-            const card = document.getElementById(`card-${index}`);
-            card.classList.toggle('is-flipped');
+        function flip(id) {
+            document.getElementById(`card-${id}`).classList.toggle('is-flipped');
         }
     </script>
 </body>
