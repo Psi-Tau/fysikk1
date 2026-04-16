@@ -3,140 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fysikkportalen | Oversikt</title>
+    <title>Fysikk 2 – Interaktiv Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2c3e50;
-            --fys1: #3498db;
-            --fys2: #e67e22;
-            --bg: #f4f7f6;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
         }
-
-        header {
-            background: var(--primary);
-            color: white;
-            width: 100%;
-            padding: 2.5rem 0;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-bottom: 40px;
-        }
-
-        .container {
-            max-width: 900px;
-            width: 90%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .subject-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-            border-bottom: 6px solid #ddd;
-        }
-
-        .subject-card:hover {
+        .card-hover:hover {
             transform: translateY(-8px);
-            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
-        }
-
-        .card-header {
-            padding: 30px;
-            text-align: center;
-            color: white;
-            font-size: 2.5rem;
-        }
-
-        .fys1-head { background: var(--fys1); }
-        .fys2-head { background: var(--fys2); }
-
-        .card-body {
-            padding: 25px;
-            text-align: center;
-        }
-
-        .card-body h2 {
-            margin: 0 0 10px 0;
-            color: var(--primary);
-        }
-
-        .card-body p {
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .btn-enter {
-            display: inline-block;
-            padding: 10px 20px;
-            border-radius: 20px;
-            background: var(--primary);
-            color: white;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        footer {
-            margin-top: auto;
-            padding: 30px;
-            color: #7f8c8d;
-            font-size: 0.85rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-    <header>
-        <h1>Fysikkportalen</h1>
-        <p>Velg kategori for å finne ressurser</p>
+    <!-- Header Section -->
+    <header class="bg-slate-900 text-white py-16 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-5xl font-black tracking-tight mb-4 uppercase">Fysikk 2 Lab</h1>
+            <p class="text-slate-400 text-xl max-w-2xl mx-auto">
+                Velkommen til din digitale lab-portal. Her har du tilgang til alle dine aktive forsøk.
+            </p>
+        </div>
     </header>
 
-    <div class="container">
-        <a href="lab/index.html" class="subject-card" style="border-color: var(--fys1);">
-            <div class="card-header fys1-head">🔬</div>
-            <div class="card-body">
-                <h2>Lab</h2>
-                <p>Oversikt over laboratorieøvelser og forsøk.</p>
-                <div class="btn-enter">Åpne lab</div>
-            </div>
-        </a>
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl mx-auto w-full p-8 -mt-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            
+            <!-- Magnet gjennom spole -->
+            <a href="magnet_gjennom_spole.html" class="card-hover bg-white p-8 rounded-3xl shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-2 border-transparent hover:border-blue-500">
+                <div class="w-24 h-24 bg-blue-50 rounded-2xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 transition-transform">
+                    🧲
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Magnet i spole</h2>
+                <p class="text-slate-500 text-sm">Undersøk Faradays lov og induksjon med fallende magneter.</p>
+                <span class="mt-4 text-blue-600 font-bold text-sm group-hover:underline">Start forsøk →</span>
+            </a>
 
-        <a href="oppgaver/index.html" class="subject-card" style="border-color: var(--fys2);">
-            <div class="card-header fys2-head">📝</div>
-            <div class="card-body">
-                <h2>Oppgaver</h2>
-                <p>Gå til ukesoppgaver og andre treningsmateriell.</p>
-                <div class="btn-enter" style="background: var(--fys2);">Åpne oppgaver</div>
-            </div>
-        </a>
-    </div>
+            <!-- Fall i magnetfelt -->
+            <a href="sloyfe_i_magnetfelt.html" class="card-hover bg-white p-8 rounded-3xl shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-2 border-transparent hover:border-emerald-500">
+                <div class="w-24 h-24 bg-emerald-50 rounded-2xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 transition-transform">
+                    🟦
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Fall i magnetfelt</h2>
+                <p class="text-slate-500 text-sm">Se hvordan magnetisk bremsing påvirker en ledersløyfe.</p>
+                <span class="mt-4 text-emerald-600 font-bold text-sm group-hover:underline">Start forsøk →</span>
+            </a>
 
-    <div class="audio-player">
-        <audio controls loop>
-            <source src="Kitchen_Window_Light.mp3" type="audio/mpeg">
-            Nettleseren din støtter ikke lydavspilling.
-        </audio>
-    </div>
+            <!-- Skråplan (NYTT FORSØK) -->
+            <a href="skroplan.html" class="card-hover bg-white p-8 rounded-3xl shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-2 border-transparent hover:border-rose-500">
+                <div class="w-24 h-24 bg-rose-50 rounded-2xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 transition-transform">
+                    📐
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Skråplan</h2>
+                <p class="text-slate-500 text-sm">Analyse av krefter, friksjon og energi på et justerbart plan.</p>
+                <span class="mt-4 text-rose-600 font-bold text-sm group-hover:underline">Start forsøk →</span>
+            </a>
 
-    <footer>
-        Laget for Fysikkfaget &copy; 2026
+            <!-- Skrått kast -->
+            <a href="skraatt_kast.html" class="card-hover bg-white p-8 rounded-3xl shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-2 border-transparent hover:border-orange-500">
+                <div class="w-24 h-24 bg-orange-50 rounded-2xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 transition-transform">
+                    ⚾
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Skrått kast</h2>
+                <p class="text-slate-500 text-sm">Simuler kastebevegelse med luftmotstand og ulike vinkler.</p>
+                <span class="mt-4 text-orange-600 font-bold text-sm group-hover:underline">Start forsøk →</span>
+            </a>
+
+            <!-- Hanois tårn -->
+            <a href="hanoi.html" class="card-hover bg-white p-8 rounded-3xl shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-2 border-transparent hover:border-purple-500">
+                <div class="w-24 h-24 bg-purple-50 rounded-2xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 transition-transform">
+                    🧩
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Hanois tårn</h2>
+                <p class="text-slate-500 text-sm">Klassisk oppgave for logisk trening og problemløsning.</p>
+                <span class="mt-4 text-purple-600 font-bold text-sm group-hover:underline">Start spill →</span>
+            </a>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center text-slate-400 text-sm">
+        <p>Fysikk 2 - Interaktiv Lab Portal</p>
     </footer>
 
 </body>
