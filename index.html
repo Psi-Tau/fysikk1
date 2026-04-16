@@ -3,46 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Min Nettside</title>
+    <title>Fysikkportalen | Oversikt</title>
     <style>
+        :root {
+            --primary: #2c3e50;
+            --fys1: #3498db;
+            --fys2: #e67e22;
+            --bg: #f4f7f6;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 40px;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
+
+        header {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 2.5rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
         .container {
-            max-width: 600px;
+            max-width: 900px;
+            width: 90%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .subject-card {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        h1 { color: #333; }
-        ul { list-style-type: none; padding: 0; }
-        li { margin: 10px 0; }
-        a {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             text-decoration: none;
-            color: #007BFF;
-            font-weight: bold;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 6px solid #ddd;
         }
-        a:hover { text-decoration: underline; }
+
+        .subject-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            padding: 30px;
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+        }
+
+        .fys1-head { background: var(--fys1); }
+        .fys2-head { background: var(--fys2); }
+
+        .card-body {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .card-body h2 {
+            margin: 0 0 10px 0;
+            color: var(--primary);
+        }
+
+        .card-body p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .btn-enter {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 30px;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Velkommen til oversikten</h1>
-    <p>Her er lenkene du ba om:</p>
-    
-    <ul>
-        <li><a href="V25_oppgave1.html">Gå til oppgave 1 Eksamen Fysikk 2 V25.html</a></li>
-        <li><a href="snake.html">Snake 2</a></li>
-        <li><a href="magnet_gjennom_spole.html">Magnet gjennom spole 3</a></li>
-        <li><a href="hovedside.html">Hovedside 4</a></li>
-        <li><a href="bigbang.html">Big Bang 5</a></li>
-    </ul>
-</div>
+    <header>
+        <h1>Fysikkportalen</h1>
+        <p>Velg fag for å starte ukens oppgaver</p>
+    </header>
+
+    <div class="container">
+        <a href="oppgaver.html" class="subject-card" style="border-color: var(--fys1);">
+            <div class="card-header fys1-head">⚡</div>
+            <div class="card-body">
+                <h2>Fysikk 1</h2>
+                <p>Gå til ukesoppgaver og forsøk for Fysikk 1.</p>
+                <div class="btn-enter">Åpne portal</div>
+            </div>
+        </a>
+
+        <a href="https://test-fys2.netlify.app" class="subject-card" style="border-color: var(--fys2);">
+            <div class="card-header fys2-head">🚀</div>
+            <div class="card-body">
+                <h2>Fysikk 2</h2>
+                <p>Gå til den eksterne testsiden for Fysikk 2.</p>
+                <div class="btn-enter" style="background: var(--fys2);">Åpne portal</div>
+            </div>
+        </a>
+    </div>
+
+    <footer>
+        Laget for Fysikkfaget &copy; 2026
+    </footer>
 
 </body>
 </html>
