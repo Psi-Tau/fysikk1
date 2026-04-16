@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online labøvelse – skrått kast</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --danger: #ef4444;
+      --border: #334155;
+      --card: #0b1220;
+      --shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #0b1020, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.9rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .panel-body {
+      padding: 16px 18px 18px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      color: #dbeafe;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    select, input[type="number"], button {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 10px 12px;
+      font-size: 0.98rem;
+      outline: none;
+    }
+
+    .inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+    }
+
+    .checkbox-wrap input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    button {
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.2s ease, background 0.2s ease;
+      font-weight: 600;
+    }
+
+    button:hover { opacity: 0.95; }
+    button:active { transform: translateY(1px); }
+
+    .primary { background: linear-gradient(90deg, #0ea5e9, #2563eb); }
+    .success { background: linear-gradient(90deg, #10b981, #22c55e); }
+    .warning { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+    .secondary { background: linear-gradient(90deg, #374151, #4b5563); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .stat {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 0.87rem;
+      margin-bottom: 4px;
+    }
+
+    .stat .value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .canvas-wrap {
+      padding: 12px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 430px;
+      display: block;
+      background: linear-gradient(180deg, #dbeafe 0%, #eff6ff 45%, #dcfce7 45%, #bbf7d0 100%);
+      border-radius: 16px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      color: var(--muted);
+      padding: 0 12px 12px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border-top: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(148,163,184,0.18);
+      font-size: 0.94rem;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #0f172a;
+      color: #bfdbfe;
+      z-index: 1;
+    }
+
+    tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+      margin-top: 10px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      color: #bae6fd;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      font-size: 0.8rem;
+    }
+
+    .footer-note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 1000px) {
+      .grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .stats { grid-template-columns: 1fr; }
+      .inline, .btn-row { grid-template-columns: 1fr; }
+      canvas { height: 340px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Online labøvelse – skrått kast med kasteapparat</h1>
+    <div class="subtitle">
+      Simuler skrått kast med eller uten luftmotstand. Velg mellom 3 hastigheter, 2 masser og 2 størrelser,
+      juster vinkel, og lagre måleserien som CSV. Målingene får automatisk lagt inn omtrent <strong>±3 % usikkerhet</strong>.
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Innstillinger</h2>
+        <div class="panel-body">
+          <div class="form-group">
+            <label for="speed">Utgangshastighet</label>
+            <select id="speed">
+              <option value="12">Lav – 12 m/s</option>
+              <option value="18" selected>Middels – 18 m/s</option>
+              <option value="24">Høy – 24 m/s</option>
+            </select>
+          </div>
+
+          <div class="inline">
+            <div class="form-group">
+              <label for="mass">Masse</label>
+              <select id="mass">
+                <option value="0.05">Lett – 0,05 kg</option>
+                <option value="0.10" selected>Tung – 0,10 kg</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="size">Størrelse (diameter)</label>
+              <select id="size">
+                <option value="0.03">Liten – 3 cm</option>
+                <option value="0.05" selected>Stor – 5 cm</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="angle">Vinkel: <span id="angleValue">45</span>°</label>
+            <input id="angle" type="range" min="5" max="85" step="1" value="45" />
+          </div>
+
+          <div class="form-group">
+            <label>Motstand i lufta</label>
+            <div class="checkbox-wrap">
+              <input id="airResistance" type="checkbox" checked />
+              <span>Bruk luftmotstand</span>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="primary" id="launchBtn">Kjør kast</button>
+            <button class="secondary" id="resetViewBtn">Nullstill visning</button>
+          </div>
+          <div class="btn-row">
+            <button class="success" id="csvBtn">Lagre målinger som CSV</button>
+            <button class="warning" id="clearBtn">Tøm måleserie</button>
+          </div>
+
+          <div class="note">
+            <span class="pill">Tips</span><br>
+            Uten luftmotstand vil masse og størrelse ikke påvirke kastelengden i modellen. Med luftmotstand får både masse og størrelse betydning.
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Simulering og resultater</h2>
+        <div class="panel-body">
+          <div class="stats">
+            <div class="stat">
+              <div class="label">Målt fart</div>
+              <div class="value" id="speedMeasured">–</div>
+            </div>
+            <div class="stat">
+              <div class="label">Målt kastelengde</div>
+              <div class="value" id="rangeMeasured">–</div>
+            </div>
+            <div class="stat">
+              <div class="label">Flytid</div>
+              <div class="value" id="flightTime">–</div>
+            </div>
+            <div class="stat">
+              <div class="label">Maks høyde</div>
+              <div class="value" id="maxHeight">–</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas-wrap">
+          <canvas id="simCanvas" width="900" height="430"></canvas>
+        </div>
+        <div class="legend">
+          <div><span class="dot" style="background:#2563eb"></span>Banekurve</div>
+          <div><span class="dot" style="background:#ef4444"></span>Målt nedslag</div>
+          <div><span class="dot" style="background:#111827"></span>Startpunkt</div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tid</th>
+                <th>Luftmotstand</th>
+                <th>Vinkel (°)</th>
+                <th>Satt fart (m/s)</th>
+                <th>Målt fart (m/s)</th>
+                <th>Masse (kg)</th>
+                <th>Størrelse (m)</th>
+                <th>Målt lengde (m)</th>
+                <th>Flytid (s)</th>
+                <th>Maks høyde (m)</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+        <div class="panel-body footer-note">
+          Måleusikkerhet legges inn som tilfeldig variasjon innen omtrent ±3 % på fart og lengde for hvert kast.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const g = 9.81;
+    const rho = 1.225;
+    const Cd = 0.47;
+    const launchHeight = 0.0;
+    const dt = 0.01;
+
+    const speedEl = document.getElementById('speed');
+    const massEl = document.getElementById('mass');
+    const sizeEl = document.getElementById('size');
+    const angleEl = document.getElementById('angle');
+    const angleValueEl = document.getElementById('angleValue');
+    const airResistanceEl = document.getElementById('airResistance');
+    const launchBtn = document.getElementById('launchBtn');
+    const resetViewBtn = document.getElementById('resetViewBtn');
+    const csvBtn = document.getElementById('csvBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    const speedMeasuredEl = document.getElementById('speedMeasured');
+    const rangeMeasuredEl = document.getElementById('rangeMeasured');
+    const flightTimeEl = document.getElementById('flightTime');
+    const maxHeightEl = document.getElementById('maxHeight');
+    const resultsBody = document.getElementById('resultsBody');
+
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let measurements = [];
+    let latestPath = [];
+    let latestMeasuredRange = null;
+    let latestScale = { maxX: 30, maxY: 10 };
+    let animationFrame = null;
+
+    function randomUncertainty3Percent(value) {
+      const factor = 1 + (Math.random() * 0.06 - 0.03);
+      return value * factor;
+    }
+
+    function format(num, digits = 2) {
+      return Number(num).toFixed(digits).replace('.', ',');
+    }
+
+    function nowStamp() {
+      const d = new Date();
+      return d.toLocaleString('no-NO');
+    }
+
+    function analyticalNoDrag(v0, angleDeg) {
+      const angle = angleDeg * Math.PI / 180;
+      const vx = v0 * Math.cos(angle);
+      const vy = v0 * Math.sin(angle);
+      const flightTime = (2 * vy) / g;
+      const range = vx * flightTime;
+      const maxHeight = (vy * vy) / (2 * g);
+      const path = [];
+      for (let t = 0; t <= flightTime; t += 0.01) {
+        const x = vx * t;
+        const y = vy * t - 0.5 * g * t * t;
+        path.push({ x, y: Math.max(0, y) });
+      }
+      if (path.length === 0 || path[path.length - 1].x < range) {
+        path.push({ x: range, y: 0 });
+      }
+      return { range, flightTime, maxHeight, path };
+    }
+
+    function numericalWithDrag(v0, angleDeg, mass, diameter) {
+      const angle = angleDeg * Math.PI / 180;
+      let vx = v0 * Math.cos(angle);
+      let vy = v0 * Math.sin(angle);
+      let x = 0;
+      let y = launchHeight;
+      let t = 0;
+      let maxHeight = y;
+      const A = Math.PI * Math.pow(diameter / 2, 2);
+      const path = [{ x, y }];
+      let prev = { x, y, t };
+
+      while (t < 30) {
+        const v = Math.hypot(vx, vy);
+        const drag = 0.5 * rho * Cd * A * v * v;
+        const ax = v > 0 ? -(drag / mass) * (vx / v) : 0;
+        const ay = v > 0 ? -(drag / mass) * (vy / v) - g : -g;
+
+        vx += ax * dt;
+        vy += ay * dt;
+        x += vx * dt;
+        y += vy * dt;
+        t += dt;
+        maxHeight = Math.max(maxHeight, y);
+        path.push({ x, y: Math.max(0, y) });
+
+        if (y <= 0 && t > dt) {
+          const alpha = prev.y / (prev.y - y || 1e-9);
+          const xImpact = prev.x + alpha * (x - prev.x);
+          const tImpact = prev.t + alpha * (t - prev.t);
+          path[path.length - 1] = { x: xImpact, y: 0 };
+          return { range: xImpact, flightTime: tImpact, maxHeight: Math.max(0, maxHeight), path };
+        }
+        prev = { x, y, t };
+      }
+
+      return { range: x, flightTime: t, maxHeight: Math.max(0, maxHeight), path };
+    }
+
+    function simulateShot() {
+      const v0 = parseFloat(speedEl.value);
+      const mass = parseFloat(massEl.value);
+      const diameter = parseFloat(sizeEl.value);
+      const angleDeg = parseFloat(angleEl.value);
+      const withDrag = airResistanceEl.checked;
+
+      const result = withDrag
+        ? numericalWithDrag(v0, angleDeg, mass, diameter)
+        : analyticalNoDrag(v0, angleDeg);
+
+      const measuredSpeed = randomUncertainty3Percent(v0);
+      const measuredRange = Math.max(0, randomUncertainty3Percent(result.range));
+
+      latestPath = result.path;
+      latestMeasuredRange = measuredRange;
+      latestScale = {
+        maxX: Math.max(10, result.range * 1.18),
+        maxY: Math.max(4, result.maxHeight * 1.35)
+      };
+
+      const row = {
+        id: measurements.length + 1,
+        time: nowStamp(),
+        airResistance: withDrag ? 'Ja' : 'Nei',
+        angle: angleDeg,
+        setSpeed: v0,
+        measuredSpeed,
+        mass,
+        size: diameter,
+        measuredRange,
+        flightTime: result.flightTime,
+        maxHeight: result.maxHeight
+      };
+      measurements.push(row);
+      appendMeasurementRow(row);
+
+      speedMeasuredEl.textContent = format(measuredSpeed) + ' m/s';
+      rangeMeasuredEl.textContent = format(measuredRange) + ' m';
+      flightTimeEl.textContent = format(result.flightTime) + ' s';
+      maxHeightEl.textContent = format(result.maxHeight) + ' m';
+
+      animatePath(latestPath, latestScale, latestMeasuredRange);
+    }
+
+    function appendMeasurementRow(row) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${row.id}</td>
+        <td>${row.time}</td>
+        <td>${row.airResistance}</td>
+        <td>${format(row.angle, 0)}</td>
+        <td>${format(row.setSpeed)}</td>
+        <td>${format(row.measuredSpeed)}</td>
+        <td>${format(row.mass, 2)}</td>
+        <td>${format(row.size, 2)}</td>
+        <td>${format(row.measuredRange)}</td>
+        <td>${format(row.flightTime)}</td>
+        <td>${format(row.maxHeight)}</td>
+      `;
+      resultsBody.prepend(tr);
+    }
+
+    function drawScene(path = [], scale = latestScale, progress = 1, measuredRange = latestMeasuredRange) {
+      const W = canvas.width;
+      const H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const padLeft = 56;
+      const padRight = 30;
+      const padTop = 28;
+      const padBottom = 52;
+      const plotW = W - padLeft - padRight;
+      const plotH = H - padTop - padBottom;
+      const maxX = Math.max(10, scale.maxX);
+      const maxY = Math.max(4, scale.maxY);
+
+      function sx(x) { return padLeft + (x / maxX) * plotW; }
+      function sy(y) { return H - padBottom - (y / maxY) * plotH; }
+
+      // Sky + ground accents
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.beginPath();
+      ctx.arc(W - 90, 70, 30, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Grid
+      ctx.strokeStyle = 'rgba(15,23,42,0.12)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 6; i++) {
+        const y = padTop + (plotH / 6) * i;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, y);
+        ctx.lineTo(W - padRight, y);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= 8; i++) {
+        const x = padLeft + (plotW / 8) * i;
+        ctx.beginPath();
+        ctx.moveTo(x, padTop);
+        ctx.lineTo(x, H - padBottom);
+        ctx.stroke();
+      }
+
+      // Axes
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(padLeft, padTop);
+      ctx.lineTo(padLeft, H - padBottom);
+      ctx.lineTo(W - padRight, H - padBottom);
+      ctx.stroke();
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('høyde (m)', 8, 18);
+      ctx.fillText('lengde (m)', W - 90, H - 18);
+
+      // Axis labels
+      ctx.fillStyle = 'rgba(15,23,42,0.8)';
+      for (let i = 0; i <= 6; i++) {
+        const val = ((maxY / 6) * (6 - i)).toFixed(1);
+        const y = padTop + (plotH / 6) * i;
+        ctx.fillText(val.replace('.', ','), 12, y + 4);
+      }
+      for (let i = 0; i <= 8; i++) {
+        const val = ((maxX / 8) * i).toFixed(1);
+        const x = padLeft + (plotW / 8) * i;
+        ctx.fillText(val.replace('.', ','), x - 10, H - 28);
+      }
+
+      // Launcher
+      const lx = sx(0);
+      const ly = sy(0);
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(lx - 10, ly - 8, 20, 8);
+      ctx.fillRect(lx - 2, ly - 24, 4, 16);
+
+      if (path.length > 1) {
+        const count = Math.max(2, Math.floor(path.length * progress));
+        const shown = path.slice(0, count);
+
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        shown.forEach((p, i) => {
+          const x = sx(p.x);
+          const y = sy(p.y);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        const current = shown[shown.length - 1];
+        ctx.fillStyle = '#1d4ed8';
+        ctx.beginPath();
+        ctx.arc(sx(current.x), sy(current.y), 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Measured impact marker
+      if (typeof measuredRange === 'number') {
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(sx(Math.min(measuredRange, maxX)), sy(0), 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#7f1d1d';
+        ctx.fillText('målt nedslag', sx(Math.min(measuredRange, maxX)) + 8, sy(0) - 8);
+      }
+    }
+
+    function animatePath(path, scale, measuredRange) {
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+      const start = performance.now();
+      const duration = 1400;
+
+      function step(now) {
+        const progress = Math.min(1, (now - start) / duration);
+        drawScene(path, scale, progress, progress >= 1 ? measuredRange : null);
+        if (progress < 1) {
+          animationFrame = requestAnimationFrame(step);
+        } else {
+          animationFrame = null;
+        }
+      }
+      animationFrame = requestAnimationFrame(step);
+    }
+
+    function resetView() {
+      latestPath = [];
+      latestMeasuredRange = null;
+      latestScale = { maxX: 30, maxY: 10 };
+      drawScene([], latestScale, 1, null);
+      speedMeasuredEl.textContent = '–';
+      rangeMeasuredEl.textContent = '–';
+      flightTimeEl.textContent = '–';
+      maxHeightEl.textContent = '–';
+    }
+
+    function clearMeasurements() {
+      measurements = [];
+      resultsBody.innerHTML = '';
+      resetView();
+    }
+
+    function downloadCSV() {
+      if (measurements.length === 0) {
+        alert('Ingen målinger å lagre enda. Kjør minst ett kast først.');
+        return;
+      }
+
+      const headers = [
+        'Nr',
+        'Tid',
+        'Luftmotstand',
+        'Vinkel (grader)',
+        'Satt fart (m/s)',
+        'Målt fart (m/s)',
+        'Masse (kg)',
+        'Størrelse (m)',
+        'Målt lengde (m)',
+        'Flytid (s)',
+        'Maks høyde (m)'
+      ];
+
+      const rows = measurements.map(m => [
+        m.id,
+        m.time,
+        m.airResistance,
+        m.angle,
+        m.setSpeed.toFixed(3),
+        m.measuredSpeed.toFixed(3),
+        m.mass.toFixed(3),
+        m.size.toFixed(3),
+        m.measuredRange.toFixed(3),
+        m.flightTime.toFixed(3),
+        m.maxHeight.toFixed(3)
+      ]);
+
+      const csv = [headers, ...rows]
+        .map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(';'))
+        .join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'malinger-skraatt-kast.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    angleEl.addEventListener('input', () => {
+      angleValueEl.textContent = angleEl.value;
+    });
+
+    launchBtn.addEventListener('click', simulateShot);
+    resetViewBtn.addEventListener('click', resetView);
+    csvBtn.addEventListener('click', downloadCSV);
+    clearBtn.addEventListener('click', clearMeasurements);
+
+    // Initial drawing
+    drawScene([], latestScale, 1, null);
+  </script>
+</body>
+</html>

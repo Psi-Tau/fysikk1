@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datalogger - Induksjonsforsøk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; }
+        .lab-grid { display: grid; grid-template-columns: 1fr 400px; gap: 1.5rem; height: calc(100vh - 100px); }
+        .experiment-box { background: white; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; display: flex; flex-direction: column; }
+        .controls-box { background: #1e293b; color: white; border-radius: 12px; padding: 1.5rem; overflow-y: auto; }
+        .graph-area { height: 300px; background: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px; }
+        .lcd-panel { background: #0f172a; color: #38bdf8; font-family: 'monospace'; padding: 10px; border-radius: 6px; border: 1px solid #334155; }
+    </style>
+</head>
+<body class="p-6">
+    <header class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Fysikk 2: Induksjonslab</h1>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="resetData()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded font-bold text-sm transition">Nullstill alt</button>
+        </div>
+    </header>
+
+    <div class="lab-grid">
+        <!-- VENSTRE: FORSØKET -->
+        <div class="experiment-box shadow-inner">
+            <div class="absolute top-4 left-4 z-10">
+                <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse" id="rec-indicator" style="display:none">● OPPTAK</span>
+            </div>
+            
+            <canvas id="animCanvas" class="w-full flex-grow"></canvas>
+            
+            <div class="p-4 border-t bg-slate-50 flex justify-center gap-4">
+                <button id="start-btn" onclick="startExperiment()" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-black shadow-lg transition transform active:scale-95">
+                    SLIPP MAGNET
+                </button>
+                <button id="pause-btn" onclick="togglePause()" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-black shadow-lg transition opacity-50 cursor-not-allowed" disabled>
+                    PAUSE
+                </button>
+            </div>
+        </div>
+
+        <!-- HØYRE: KONTROLLERE OG GRAF -->
+        <div class="controls-box shadow-xl space-y-6">
+            <section class="space-y-4">
+                <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Konfigurasjon</h2>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="setMagnetDir('NS')" id="btn-ns" class="bg-blue-600 p-2 rounded text-[10px] font-bold ring-2 ring-white">NORD FØRST</button>
+                    <button onclick="setMagnetDir('SN')" id="btn-sn" class="bg-slate-700 p-2 rounded text-[10px] font-bold">SØR FØRST</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="setPolarity(1)" id="btn-pol-std" class="bg-blue-600 p-2 rounded text-[10px] font-bold ring-2 ring-white">VOLTMETER + / -</button>
+                    <button onclick="setPolarity(-1)" id="btn-pol-rev" class="bg-slate-700 p-2 rounded text-[10px] font-bold">VOLTMETER - / +</button>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-xs font-bold">Vindinger: <span id="n-display" class="text-blue-400">200</span></label>
+                    <input type="range" id="n-input" min="50" max="1000" step="50" value="200" class="w-full accent-blue-500">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-xs font-bold">Høyde: <span id="h-display" class="text-blue-400">1.0 m</span></label>
+                    <input type="range" id="h-input" min="0.2" max="2.0" step="0.1" value="1.0" class="w-full accent-blue-500">
+                </div>
+            </section>
+
+            <section class="space-y-4">
+                <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Datalogger</h2>
+                <div class="graph-area">
+                    <canvas id="dataChart"></canvas>
+                </div>
+                
+                <div id="selection-info" class="lcd-panel text-[11px] space-y-2 hidden">
+                    <div class="flex justify-between"><span>AREAL (∫ε dt):</span> <span id="area-val" class="font-bold">0.0000 Vs</span></div>
+                    <div class="flex justify-between"><span>TOPPUNKT:</span> <span id="peak-val" class="text-rose-400">0.00 V</span></div>
+                    <div class="flex justify-between"><span>BUNNPUNKT:</span> <span id="trough-val" class="text-indigo-400">0.00 V</span></div>
+                </div>
+            </section>
+
+            <div class="text-[10px] text-slate-500 italic bg-slate-800/50 p-3 rounded leading-normal">
+                Marker et område på grafen med musa for å måle arealet (fluksendringen).
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('animCanvas');
+        const ctx = canvas.getContext('2d');
+        const chartCtx = document.getElementById('dataChart').getContext('2d');
+        
+        let isRunning = false;
+        let isPaused = false;
+        let magnetDir = 'NS';
+        let polarity = 1;
+        let magnetY = -100;
+        let v = 0;
+        let timeData = [];
+        let voltageData = [];
+        let chart = null;
+
+        let selectionStart = null;
+        let selectionEnd = null;
+        let isSelecting = false;
+
+        const g = 9.81;
+        const dt = 0.005;
+
+        function setMagnetDir(dir) {
+            magnetDir = dir;
+            document.getElementById('btn-ns').className = dir === 'NS' ? 'bg-blue-600 p-2 rounded text-[10px] font-bold ring-2 ring-white' : 'bg-slate-700 p-2 rounded text-[10px] font-bold';
+            document.getElementById('btn-sn').className = dir === 'SN' ? 'bg-blue-600 p-2 rounded text-[10px] font-bold ring-2 ring-white' : 'bg-slate-700 p-2 rounded text-[10px] font-bold';
+            draw();
+        }
+
+        function setPolarity(p) {
+            polarity = p;
+            document.getElementById('btn-pol-std').className = p === 1 ? 'bg-blue-600 p-2 rounded text-[10px] font-bold ring-2 ring-white' : 'bg-slate-700 p-2 rounded text-[10px] font-bold';
+            document.getElementById('btn-pol-rev').className = p === -1 ? 'bg-blue-600 p-2 rounded text-[10px] font-bold ring-2 ring-white' : 'bg-slate-700 p-2 rounded text-[10px] font-bold';
+            draw();
+        }
+
+        function togglePause() {
+            if (!isRunning) return;
+            isPaused = !isPaused;
+            const btn = document.getElementById('pause-btn');
+            btn.innerText = isPaused ? "FORTSETT" : "PAUSE";
+            btn.className = isPaused ? "bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-black shadow-lg transition" : "bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-black shadow-lg transition";
+        }
+
+        function initChart() {
+            chart = new Chart(chartCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Spenning (V)',
+                        data: [],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        fill: 'origin',
+                        tension: 0.2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    events: ['mousedown', 'mousemove', 'mouseup', 'mouseleave'],
+                    scales: {
+                        x: { type: 'linear', title: { display: false }, grid: { color: '#f1f5f9' } },
+                        y: { suggestedMin: -6, suggestedMax: 6, grid: { color: '#f1f5f9' } }
+                    },
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                },
+                plugins: [{
+                    id: 'areaSelector',
+                    afterDraw: (chart) => {
+                        if (selectionStart !== null && selectionEnd !== null) {
+                            const {ctx, chartArea: {top, bottom}, scales: {x}} = chart;
+                            const left = x.getPixelForValue(selectionStart);
+                            const right = x.getPixelForValue(selectionEnd);
+                            ctx.save();
+                            ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+                            ctx.fillRect(left, top, right - left, bottom - top);
+                            ctx.strokeStyle = '#0ea5e9';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(left, top, right - left, bottom - top);
+                            ctx.restore();
+                        }
+                    }
+                }]
+            });
+
+            const chartCanvas = document.getElementById('dataChart');
+            chartCanvas.addEventListener('mousedown', e => {
+                if(isRunning) return;
+                selectionStart = chart.scales.x.getValueForPixel(e.offsetX);
+                selectionEnd = selectionStart;
+                isSelecting = true;
+                document.getElementById('selection-info').classList.remove('hidden');
+            });
+            chartCanvas.addEventListener('mousemove', e => {
+                if (isSelecting) {
+                    selectionEnd = chart.scales.x.getValueForPixel(e.offsetX);
+                    calculateArea();
+                    chart.update('none');
+                }
+            });
+            chartCanvas.addEventListener('mouseup', () => { isSelecting = false; });
+        }
+
+        function calculateArea() {
+            if (selectionStart === null || selectionEnd === null) return;
+            let start = Math.min(selectionStart, selectionEnd);
+            let end = Math.max(selectionStart, selectionEnd);
+            let area = 0, maxV = -Infinity, minV = Infinity;
+            
+            for (let i = 0; i < timeData.length; i++) {
+                if (timeData[i] >= start && timeData[i] <= end) {
+                    if (i > 0) {
+                        let dx = timeData[i] - timeData[i-1];
+                        area += ((voltageData[i] + voltageData[i-1]) / 2) * dx;
+                    }
+                    if (voltageData[i] > maxV) maxV = voltageData[i];
+                    if (voltageData[i] < minV) minV = voltageData[i];
+                }
+            }
+            document.getElementById('area-val').innerText = area.toFixed(5) + " Vs";
+            document.getElementById('peak-val').innerText = (maxV === -Infinity ? 0 : maxV).toFixed(2) + " V";
+            document.getElementById('trough-val').innerText = (minV === Infinity ? 0 : minV).toFixed(2) + " V";
+        }
+
+        function resetData() {
+            isRunning = false; isPaused = false;
+            timeData = []; voltageData = [];
+            selectionStart = null; selectionEnd = null;
+            magnetY = -100;
+            document.getElementById('pause-btn').disabled = true;
+            document.getElementById('pause-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('rec-indicator').style.display = 'none';
+            document.getElementById('selection-info').classList.add('hidden');
+            chart.data.datasets[0].data = [];
+            chart.update();
+            draw();
+        }
+
+        function draw() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            // Tegn stativ / rør
+            ctx.fillStyle = '#f1f5f9';
+            ctx.fillRect(cx-50, 0, 100, canvas.height);
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeRect(cx-50, 0, 100, canvas.height);
+
+            // Tegn Spole
+            ctx.strokeStyle = '#c2410c'; ctx.lineWidth = 5;
+            for (let i = 0; i < 15; i++) {
+                ctx.beginPath();
+                ctx.ellipse(cx, cy - 50 + i*7, 48, 14, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Ledninger til multimeter (visuelt)
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = polarity === 1 ? '#ef4444' : '#22c55e';
+            ctx.beginPath(); ctx.moveTo(cx - 48, cy); ctx.bezierCurveTo(cx-150, cy, cx-150, cy+150, cx-200, cy+150); ctx.stroke();
+            ctx.strokeStyle = polarity === 1 ? '#22c55e' : '#ef4444';
+            ctx.beginPath(); ctx.moveTo(cx + 48, cy); ctx.bezierCurveTo(cx+150, cy, cx+150, cy+150, cx+200, cy+150); ctx.stroke();
+
+            // Magnet
+            const mH = 90; const mW = 35;
+            const topC = magnetDir === 'NS' ? '#ef4444' : '#3b82f6';
+            const botC = magnetDir === 'NS' ? '#3b82f6' : '#ef4444';
+            
+            ctx.fillStyle = topC; ctx.fillRect(cx - mW/2, magnetY, mW, mH/2);
+            ctx.fillStyle = botC; ctx.fillRect(cx - mW/2, magnetY + mH/2, mW, mH/2);
+            ctx.fillStyle = 'white'; ctx.font = 'bold 16px Arial'; ctx.textAlign='center';
+            ctx.fillText(magnetDir[0], cx, magnetY + 30);
+            ctx.fillText(magnetDir[1], cx, magnetY + 75);
+        }
+
+        function startExperiment() {
+            if (isRunning) return;
+            resetData();
+            isRunning = true;
+            isPaused = false;
+            
+            document.getElementById('pause-btn').disabled = false;
+            document.getElementById('pause-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('rec-indicator').style.display = 'block';
+
+            const h = parseFloat(document.getElementById('h-input').value);
+            const N = parseInt(document.getElementById('n-input').value);
+            
+            magnetY = -150;
+            v = Math.sqrt(2 * g * h);
+            let t = 0;
+            const cy = canvas.height / 2;
+
+            function step() {
+                if (!isRunning) return;
+                
+                if (!isPaused) {
+                    v += g * dt;
+                    magnetY += v * dt * 110; 
+                    t += dt;
+
+                    const dist = magnetY - (cy - 50);
+                    const sigma = 40;
+                    const dirF = magnetDir === 'NS' ? 1 : -1;
+                    let e = - (N/35) * (v/1.8) * (dist/sigma) * Math.exp(-(dist*dist)/(2*sigma*sigma)) * dirF * polarity;
+
+                    timeData.push(t);
+                    voltageData.push(e);
+                    chart.data.datasets[0].data.push({x: t, y: e});
+                    
+                    if (Math.round(t/dt) % 3 === 0) chart.update('none');
+                    draw();
+                }
+
+                if (magnetY < canvas.height + 150) {
+                    requestAnimationFrame(step);
+                } else {
+                    isRunning = false;
+                    document.getElementById('rec-indicator').style.display = 'none';
+                    document.getElementById('pause-btn').disabled = true;
+                    chart.update();
+                }
+            }
+            step();
+        }
+
+        document.getElementById('n-input').oninput = e => document.getElementById('n-display').innerText = e.target.value;
+        document.getElementById('h-input').oninput = e => document.getElementById('h-display').innerText = e.target.value + " m";
+
+        window.onload = () => {
+            initChart();
+            draw();
+            window.addEventListener('resize', draw);
+        };
+    </script>
+</body>
+</html>

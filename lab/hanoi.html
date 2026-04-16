@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hanois Tårn – Animasjon</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#f4f7fb;
+  text-align:center;
+}
+h1 { margin-top:10px; }
+.controls{ margin:10px; }
+.board {
+  width:900px;
+  height:350px;
+  margin:20px auto;
+  display:flex;
+  justify-content:space-around;
+  align-items:flex-end;
+}
+.peg {
+  width:200px;height:300px;
+  border:3px solid #333;
+  border-radius:10px;
+  position:relative;
+  background:#e9eef7;
+  cursor:pointer;
+}
+.disk {
+  position:absolute;
+  height:22px;
+  border-radius:6px;
+  left:50%;
+  transform:translateX(-50%);
+  transition:all .25s ease;
+}
+.mistake{ background:red !important; }
+.info{ margin-top:10px; font-size:18px;}
+button,select{ padding:6px 12px;margin:5px;font-size:16px;}
+</style>
+</head>
+
+<body>
+
+<h1>Hanois Tårn</h1>
+
+<div class="controls">
+Navn: <span id="player"></span> |
+Velg ringer:
+<select id="ringSelect">
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+</select>
+<button onclick="startGame()">Start</button>
+<button onclick="restart()">Restart</button>
+<button onclick="replay()">Reprise (hurtig)</button>
+</div>
+
+<div class="info">
+Flytt: <span id="moves">0</span> |
+Minst mulig: <span id="optimal">0</span>
+</div>
+
+<div class="board">
+<div class="peg" data-id="0"></div>
+<div class="peg" data-id="1"></div>
+<div class="peg" data-id="2"></div>
+</div>
+
+<script>
+
+let name = prompt("Skriv navnet ditt:") || "Spiller";
+document.getElementById("player").innerText=name;
+
+let pegs=[[],[],[]];
+let disks=[];
+let moves=0;
+let selected=null;
+let history=[];
+let optimalMoves=[];
+let n=3;
+
+const colors=["#5C6BC0","#29B6F6","#66BB6A","#FFA726","#EF5350"];
+
+function beep(){
+let ctx=new AudioContext();
+let o=ctx.createOscillator();
+o.type="square";
+o.connect(ctx.destination);
+o.start();
+setTimeout(()=>o.stop(),100);
+}
+
+function optimal(n,a,b,c,arr=[]){
+ if(n){
+  optimal(n-1,a,c,b,arr);
+  arr.push({from:a,to:b});
+  optimal(n-1,c,b,a,arr);
+ }
+ return arr;
+}
+
+function startGame(){
+n=parseInt(ringSelect.value);
+document.getElementById("optimal").innerText=Math.pow(2,n)-1;
+
+pegs=[[],[],[]];
+history=[];
+moves=0;
+selected=null;
+document.getElementById("moves").innerText=0;
+
+document.querySelectorAll(".peg").forEach(p=>p.innerHTML="");
+
+for(let i=n;i>=1;i--){
+ let d=document.createElement("div");
+ d.className="disk";
+ d.style.width=40+i*25+"px";
+ d.style.background=colors[i-1];
+ d.dataset.size=i;
+ pegs[0].push(d);
+ document.querySelector('.peg[data-id="0"]').appendChild(d);
+}
+render();
+optimalMoves=optimal(n,0,2,1,[]);
+}
+
+function render(){
+pegs.forEach((peg,p)=>{
+ peg.forEach((d,i)=>{
+  d.style.bottom=(i*25)+"px";
+ });
+});
+}
+
+document.querySelectorAll(".peg").forEach(p=>{
+p.onclick=()=>{
+let id=parseInt(p.dataset.id);
+if(selected==null){
+ if(pegs[id].length){
+   selected=id;
+ }
+}else{
+ move(selected,id);
+ selected=null;
+}
+}
+});
+
+function move(a,b,fast=false,mark=false){
+ if(!pegs[a].length)return;
+ let d=pegs[a][pegs[a].length-1];
+ let size=parseInt(d.dataset.size);
+
+ if(pegs[b].length){
+ let top=parseInt(pegs[b][pegs[b].length-1].dataset.size);
+ if(top<size)return;
+ }
+
+ pegs[a].pop();
+ pegs[b].push(d);
+ document.querySelector('.peg[data-id="'+b+'"]').appendChild(d);
+ render();
+ beep();
+ if(!fast){
+ moves++;
+ document.getElementById("moves").innerText=moves;
+ history.push({from:a,to:b,disk:size});
+ }
+
+ if(pegs[2].length==n && !fast){
+ finish();
+ }
+}
+
+function finish(){
+localStorage.setItem("hanoi_"+name+"_"+n,moves);
+alert("Ferdig! Du brukte "+moves+" flytt.");
+}
+
+async function replay(){
+let tmp=[[],[],[]];
+for(let i=n;i>=1;i--) tmp[0].push(i);
+
+document.querySelectorAll(".peg").forEach(p=>p.innerHTML="");
+pegs=[[],[],[]];
+
+for(let i=n;i>=1;i--){
+ let d=document.createElement("div");
+ d.className="disk";
+ d.style.width=40+i*25+"px";
+ d.style.background=colors[i-1];
+ d.dataset.size=i;
+ pegs[0].push(d);
+ document.querySelector('.peg[data-id="0"]').appendChild(d);
+}
+render();
+
+for(let i=0;i<history.length;i++){
+ let m=history[i];
+ let wrong=false;
+ if(!optimalMoves[i] || optimalMoves[i].from!=m.from || optimalMoves[i].to!=m.to)
+ wrong=true;
+
+ await new Promise(r=>setTimeout(r,100));
+ let d=pegs[m.from][pegs[m.from].length-1];
+ if(wrong)d.classList.add("mistake");
+ move(m.from,m.to,true);
+ if(wrong)setTimeout(()=>d.classList.remove("mistake"),200);
+}
+}
+
+function restart(){
+startGame();
+}
+
+startGame();
+
+</script>
+
+</body>
+</html>
