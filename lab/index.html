@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fysikk 2 – Interaktiv Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-slate-900 text-white py-16 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-5xl font-black tracking-tight mb-4 uppercase">Fysikk 2 Lab</h1>
+            <p class="text-slate-400 text-xl max-w-2xl mx-auto">
+                Velkommen til din digitale lab-portal. Her har du tilgang til alle dine aktive forsøk.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl mx-auto w-full p-8 -mt-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- Magnet gjennom spole (Endret lenke her) -->
+            <a href="magnet_gjennom_spole.html" class="card-hover bg-white p-8 rounded-3xl shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-2 border-transparent hover:border-blue-500">
+                <div class="w-24 h-24 bg-blue-50 rounded-2xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 transition-transform">
+                    🧲
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Magnet i spole</h2>
+                <p class="text-slate-500 text-sm">Undersøk Faradays lov og induksjon med fallende magneter.</p>
+                <span class="mt-4 text-blue-600 font-bold text-sm group-hover:underline">Start forsøk →</span>
+            </a>
+
+            <!-- Fall i magnetfelt -->
+            <a href="sloyfe_i_magnetfelt.html" class="card-hover bg-white p-8 rounded-3xl shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-2 border-transparent hover:border-emerald-500">
+                <div class="w-24 h-24 bg-emerald-50 rounded-2xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 transition-transform">
+                    🟦
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Fall i magnetfelt</h2>
+                <p class="text-slate-500 text-sm">Se hvordan magnetisk bremsing påvirker en ledersløyfe.</p>
+                <span class="mt-4 text-emerald-600 font-bold text-sm group-hover:underline">Start forsøk →</span>
+            </a>
+
+            <!-- Skrått kast -->
+            <a href="skraatt_kast.html" class="card-hover bg-white p-8 rounded-3xl shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-2 border-transparent hover:border-orange-500">
+                <div class="w-24 h-24 bg-orange-50 rounded-2xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 transition-transform">
+                    ⚾
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Skrått kast</h2>
+                <p class="text-slate-500 text-sm">Simuler kastebevegelse med luftmotstand og ulike vinkler.</p>
+                <span class="mt-4 text-orange-600 font-bold text-sm group-hover:underline">Start forsøk →</span>
+            </a>
+
+            <!-- Hanois tårn -->
+            <a href="hanoi.html" class="card-hover bg-white p-8 rounded-3xl shadow-lg transition-all duration-300 flex flex-col items-center text-center group border-2 border-transparent hover:border-purple-500">
+                <div class="w-24 h-24 bg-purple-50 rounded-2xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 transition-transform">
+                    🧩
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Hanois tårn</h2>
+                <p class="text-slate-500 text-sm">Klassisk oppgave for logisk trening og problemløsning.</p>
+                <span class="mt-4 text-purple-600 font-bold text-sm group-hover:underline">Start spill →</span>
+            </a>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center text-slate-400 text-sm">
+        <p>Fysikk 2 - Interaktiv Lab Portal</p>
+    </footer>
+
+</body>
+</html>
