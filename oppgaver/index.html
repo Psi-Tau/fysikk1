@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oppgaver - Fysikk 1</title>
+    <title>Fysikk 1 - Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .glass-card {
@@ -21,85 +21,70 @@
 
     <div class="max-w-4xl mx-auto px-6 py-12">
         <header class="mb-12 text-center">
-            <h1 class="text-5xl font-extrabold text-slate-900 mb-4">Oppgaver</h1>
-            <p class="text-slate-600 text-lg">Underside for Fysikk 2-ressurser</p>
+            <h1 class="text-5xl font-extrabold text-slate-900 mb-4">Fysikk 1</h1>
+            <p class="text-slate-600 text-lg">Digital portal for læringsressurser</p>
         </header>
 
         <section class="mb-12">
             <h2 class="text-xl font-semibold mb-6 flex items-center text-slate-700">
                 <span class="bg-blue-600 w-2 h-8 rounded mr-3"></span>
-                Oversikt og trening
+                Arbeid og trening
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Oppgaver -->
-                <a href="oppgaver.html" class="glass-card p-6 rounded-2xl border border-slate-200 block group">
-                    <div class="text-blue-600 mb-4 group-hover:scale-110 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                
+                <a href="oppgaver.html" class="glass-card p-8 rounded-2xl border border-slate-200 block group border-l-8 border-l-amber-500">
+                    <div class="text-amber-500 mb-4 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold mb-1">Oppgavesamling</h3>
-                    <p class="text-sm text-slate-500">Alle læringsmål og regneoppgaver samlet på ett sted.</p>
+                    <h3 class="text-xl font-bold mb-2">Ukesoppgaver & Arkiv</h3>
+                    <p class="text-slate-500">Klikk her for å se ukens utfordringer og tidligere oppgaver i arkivet.</p>
+                    <div class="mt-4 text-blue-600 font-semibold flex items-center gap-2">
+                        Åpne oppgavesenteret 
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </div>
                 </a>
 
-                <!-- Flashcards -->
-                <a href="flip_enheter.html" class="glass-card p-6 rounded-2xl border border-slate-200 block group">
+                <a href="flip_enheter.html" class="glass-card p-8 rounded-2xl border border-slate-200 block group border-l-8 border-l-emerald-500">
                     <div class="text-emerald-500 mb-4 group-hover:scale-110 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold mb-1">Enhetstrening</h3>
-                    <p class="text-sm text-slate-500">Flashcards for fysiske størrelser og SI-enheter.</p>
+                    <h3 class="text-xl font-bold mb-2">Enhetstrening</h3>
+                    <p class="text-slate-500">Flashcards for fysiske størrelser og SI-enheter.</p>
+                    <div class="mt-4 text-blue-600 font-semibold flex items-center gap-2">
+                        Start trening
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </div>
                 </a>
-            </div>
-        </section>
 
-        <section class="mb-12">
-            <h2 class="text-xl font-semibold mb-6 flex items-center text-slate-700">
-                <span class="bg-amber-500 w-2 h-8 rounded mr-3"></span>
-                Ukesarbeid
-            </h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <a href="fys1_uke15.txt" class="p-4 bg-white rounded-xl border border-slate-200 text-center hover:bg-slate-50 transition-colors shadow-sm">
-                    <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fil</span>
-                    <span class="text-lg font-bold">Uke 15</span>
-                </a>
-                <a href="fys1_uke16.txt" class="p-4 bg-white rounded-xl border border-slate-200 text-center hover:bg-slate-50 transition-colors shadow-sm">
-                    <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fil</span>
-                    <span class="text-lg font-bold">Uke 16</span>
-                </a>
             </div>
         </section>
 
         <section>
             <h2 class="text-xl font-semibold mb-6 flex items-center text-slate-700">
                 <span class="bg-slate-300 w-2 h-8 rounded mr-3"></span>
-                Aktiviteter
+                Andre aktiviteter
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
-                <div class="border-2 border-dashed border-slate-300 rounded-2xl p-10 flex flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer group">
-                    <div class="bg-slate-100 p-3 rounded-full mb-3 group-hover:bg-blue-100 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                    </div>
-                    <span class="font-bold text-sm">Ny simulering</span>
+                <div class="border-2 border-dashed border-slate-300 rounded-2xl p-8 flex flex-col items-center justify-center text-slate-400">
+                    <span class="font-bold text-sm italic">Simuleringer kommer</span>
                 </div>
-                <div class="border-2 border-dashed border-slate-300 rounded-2xl p-10 flex flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer group">
-                    <div class="bg-slate-100 p-3 rounded-full mb-3 group-hover:bg-blue-100 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                    </div>
-                    <span class="font-bold text-sm">Nytt prosjekt</span>
+                <div class="border-2 border-dashed border-slate-300 rounded-2xl p-8 flex flex-col items-center justify-center text-slate-400">
+                    <span class="font-bold text-sm italic">Prosjekter kommer</span>
                 </div>
             </div>
         </section>
 
         <footer class="mt-20 pt-8 border-t border-slate-200 flex justify-between items-center text-slate-400 text-xs uppercase tracking-widest">
-            <span>Fysikk 1 Underside</span>
-            <a href="#" class="hover:text-blue-500 transition-colors">Tilbake til Fysikk-2 Portal &rarr;</a>
+            <span>Fysikk 1</span>
+            <a href="#" class="hover:text-blue-500 transition-colors italic">Laget for elever</a>
         </footer>
     </div>
 
