@@ -146,6 +146,7 @@
             margin-top: 1rem;
             font-size: 0.85rem;
             text-align: left;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -155,7 +156,7 @@
         <div class="setup-card">
             <h2>Fysikk 2 Enhetstrener</h2>
             <p>Skriv inn din Mistral API-nøkkel for å starte.</p>
-            <input type="password" id="api-key-input" placeholder="Lim inn nøkkel her...">
+            <input type="password" id="api-key-input" placeholder="Lim inn Mistral API-nøkkel her...">
             <button class="btn" style="width:100%" onclick="startApp()">Bekreft og start</button>
             <p id="setup-error" style="color:red; font-size:0.8rem; margin-top:10px; display:none;">Vennligst oppgi en gyldig nøkkel.</p>
         </div>
@@ -196,37 +197,62 @@
         }
 
         async function callMistral(prompt) {
-            // Bruker en CORS proxy for å omgå nettleserens restriksjoner
-            const proxyUrl = "https://corsproxy.io/?";
-            const targetUrl = "https://api.mistral.ai/v1/chat/completions";
+            // Prøver direkte anrop først (fungerer ofte på GitHub/Netlify)
+            const url = "https://api.mistral.ai/v1/chat/completions";
             
-            const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: "open-mistral-7b",
-                    messages: [{ role: "user", content: prompt }]
-                })
-            });
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "open-mistral-7b",
+                        messages: [{ role: "user", content: prompt }]
+                    })
+                });
 
-            if (!response.ok) {
-                const data = await response.json().catch(() => ({}));
-                throw new Error(data.message || `API-feil (${response.status}). Sjekk nøkkelen eller prøv igjen.`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorData;
+                    try { errorData = JSON.parse(errorText); } catch(e) { errorData = { message: errorText }; }
+                    throw new Error(`Mistral API feil (${response.status}): ${errorData.message || 'Ukjent feil'}`);
+                }
+
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (err) {
+                // Hvis direkte anrop feiler pga CORS (lokalt), prøver vi med proxy som fallback
+                if (err.message.includes('fetch') || err.message.includes('CORS')) {
+                    console.log("Prøver med proxy-fallback...");
+                    const proxyUrl = "https://corsproxy.io/?";
+                    const encodedUrl = encodeURIComponent(url);
+                    const proxyResponse = await fetch(proxyUrl + encodedUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: "open-mistral-7b",
+                            messages: [{ role: "user", content: prompt }]
+                        })
+                    });
+                    
+                    if (!proxyResponse.ok) throw new Error("Både direkte og proxy-anrop feilet.");
+                    const data = await proxyResponse.json();
+                    return data.choices[0].message.content;
+                }
+                throw err;
             }
-
-            const data = await response.json();
-            return data.choices[0].message.content;
         }
 
         async function loadQuestions(topic) {
             const grid = document.getElementById('grid');
             grid.innerHTML = '<div style="grid-column:1/-1; text-align:center;"><div class="loader"></div><p>Mistral genererer oppgaver om ' + topic + '...</p></div>';
 
-            const prompt = `Du er en fysikklærer for videregående skole (Fysikk 2). Lag 3 korte og varierte spørsmål som tester forståelse av enheter i temaet "${topic}". 
-            Viktig: Svar kun med de 3 spørsmålene adskilt med "###". Ingen introduksjon eller avslutning.`;
+            const prompt = `Du er en fysikklærer. Lag 3 korte spørsmål om enheter i "${topic}". Svar kun med spørsmålene adskilt med "###".`;
 
             try {
                 const text = await callMistral(prompt);
@@ -242,13 +268,13 @@
                                 <div class="q-label">Spørsmål ${i+1}</div>
                                 <div class="q-text">${q}</div>
                                 <div style="margin-top:1rem;">
-                                    <input type="text" id="ans-${i}" placeholder="Ditt svar..." onkeypress="if(event.key==='Enter') check(${i}, '${q.replace(/'/g, "\\'")}')">
+                                    <input type="text" id="ans-${i}" placeholder="Ditt svar..." onkeypress="if(event.key==='Enter') check(${id}, '${q.replace(/'/g, "\\'")}')">
                                     <button id="btn-${i}" class="btn" style="width:100%" onclick="check(${i}, '${q.replace(/'/g, "\\'")}')">Sjekk svar</button>
                                 </div>
                             </div>
                             <div class="card-face card-back">
-                                <div class="q-label">Vurdering fra Mistral</div>
-                                <div id="feedback-${i}" style="font-size:0.95rem; line-height:1.4; overflow-y:auto; max-height:200px;"></div>
+                                <div class="q-label">Vurdering</div>
+                                <div id="feedback-${i}" style="font-size:0.95rem; line-height:1.4;"></div>
                                 <button class="btn" style="margin-top:1.5rem; background:#cbd5e1; color:#334155" onclick="flip(${i})">Tilbake</button>
                             </div>
                         </div>
@@ -256,7 +282,7 @@
                     grid.appendChild(div);
                 });
             } catch (err) {
-                grid.innerHTML = `<div class="error-msg"><strong>Feil:</strong> ${err.message}<br><br><small>Tips: Sjekk at API-nøkkelen er riktig og at du har internett-tilgang.</small></div>`;
+                grid.innerHTML = `<div class="error-msg"><strong>Feil:</strong> ${err.message}</div>`;
             }
         }
 
@@ -269,15 +295,13 @@
             const feedbackElem = document.getElementById(`feedback-${id}`);
             feedbackElem.innerHTML = '<div class="loader" style="margin-top:2rem;"></div>';
 
-            const prompt = `Du er en fysikklærer. En elev fikk spørsmålet: "${question}".
-            Elevens svar er: "${answer}". 
-            Vurder om svaret er korrekt i forhold til enhetsbruk. Svar kort og presist (maks 40 ord).`;
+            const prompt = `Elev svarte "${answer}" på "${question}". Er det rett? Forklar kort (maks 30 ord).`;
 
             try {
                 const result = await callMistral(prompt);
                 feedbackElem.innerHTML = result;
             } catch (err) {
-                feedbackElem.innerHTML = "Kunne ikke hente vurdering fra Mistral.";
+                feedbackElem.innerHTML = "Feil ved henting av vurdering.";
             }
         }
 
