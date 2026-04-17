@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fysikk 2 - Enhetsøving med KI</title>
+    <title>Fysikk 2 - Enhetsøving med Mistral AI</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -47,7 +47,7 @@
             border: 1px solid #e2e8f0;
         }
 
-        input {
+        input[type="password"], input[type="text"] {
             width: 100%;
             padding: 0.8rem;
             margin: 1rem 0;
@@ -87,6 +87,7 @@
         }
 
         .btn:hover { background-color: var(--primary-dark); transform: translateY(-1px); }
+        .btn:disabled { background-color: #94a3b8; cursor: not-allowed; transform: none; }
 
         .flashcards-grid {
             display: grid;
@@ -101,7 +102,6 @@
             height: 100%;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
-            cursor: default;
         }
         .card.is-flipped { transform: rotateY(180deg); }
 
@@ -146,7 +146,6 @@
             margin-top: 1rem;
             font-size: 0.85rem;
             text-align: left;
-            overflow-wrap: break-word;
         }
     </style>
 </head>
@@ -155,17 +154,18 @@
     <div id="setup-screen">
         <div class="setup-card">
             <h2>Fysikk 2 Enhetstrener</h2>
-            <p>Skriv inn din Google API-nøkkel.</p>
-            <input type="password" id="api-key-input" placeholder="AIzaSy...">
-            <button class="btn" style="width:100%" onclick="startApp()">Start øving</button>
-            <p id="setup-error" style="color:red; font-size:0.8rem; margin-top:10px; display:none;">Nøkkelen er for kort.</p>
+            <p>Skriv inn din Mistral API-nøkkel for å starte.</p>
+            <input type="password" id="api-key-input" placeholder="Lim inn nøkkel her...">
+            <button class="btn" style="width:100%" onclick="startApp()">Bekreft og start</button>
+            <p id="setup-error" style="color:red; font-size:0.8rem; margin-top:10px; display:none;">Vennligst oppgi en gyldig nøkkel.</p>
         </div>
     </div>
 
     <div id="app-content">
         <header>
-            <h1>Enhetstrener</h1>
+            <h1>Enhetstrener (Mistral AI)</h1>
             <p>Mekanikk, Felt og Induksjon</p>
+            <button onclick="location.reload()" style="background:none; border:none; color:var(--primary); cursor:pointer; font-size:0.8rem; text-decoration:underline;">Bytt API-nøkkel</button>
         </header>
 
         <div class="topic-selector">
@@ -176,64 +176,60 @@
 
         <div id="grid" class="flashcards-grid">
             <div style="grid-column: 1/-1; text-align: center; color: #64748b; padding-top: 3rem;">
-                Velg et emne for å generere oppgaver...
+                Velg et emne for å generere oppgaver med open-mistral-7b...
             </div>
         </div>
     </div>
 
     <script>
-        let KEY = "";
+        let apiKey = "";
 
         function startApp() {
             const input = document.getElementById('api-key-input').value.trim();
-            if (input.length < 20) {
+            if (input.length < 5) {
                 document.getElementById('setup-error').style.display = 'block';
                 return;
             }
-            KEY = input;
+            apiKey = input;
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('app-content').style.display = 'flex';
         }
 
-        async function safeFetchKI(prompt) {
-            // Vi bruker en ren URL uten ekstra parametere
-            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=" + KEY;
+        async function callMistral(prompt) {
+            // Bruker en CORS proxy for å omgå nettleserens restriksjoner
+            const proxyUrl = "https://corsproxy.io/?";
+            const targetUrl = "https://api.mistral.ai/v1/chat/completions";
             
-            // Definerer payloaden eksplisitt for å unngå at Canvas-systemer legger til "ExCatalogTypeName"
-            const payload = {
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
-            };
-
-            const response = await fetch(url, {
-                method: "POST",
+            const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/json"
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
                 },
-                // Viktig: Vi sender KUN payloaden vi har definert
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    model: "open-mistral-7b",
+                    messages: [{ role: "user", content: prompt }]
+                })
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                const errorDetail = data.error ? `${data.error.status}: ${data.error.message}` : response.statusText;
-                throw new Error(errorDetail);
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.message || `API-feil (${response.status}). Sjekk nøkkelen eller prøv igjen.`);
             }
 
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            const data = await response.json();
+            return data.choices[0].message.content;
         }
 
         async function loadQuestions(topic) {
             const grid = document.getElementById('grid');
-            grid.innerHTML = '<div style="grid-column:1/-1; text-align:center;"><div class="loader"></div><p>Henter spørsmål om ' + topic + '...</p></div>';
+            grid.innerHTML = '<div style="grid-column:1/-1; text-align:center;"><div class="loader"></div><p>Mistral genererer oppgaver om ' + topic + '...</p></div>';
 
-            const prompt = `Du er en fysikklærer. Lag 3 korte og presise spørsmål om enheter i temaet "${topic}" for Fysikk 2. 
-            Svar kun med de 3 spørsmålene adskilt med "###". Ingen introduksjon.`;
+            const prompt = `Du er en fysikklærer for videregående skole (Fysikk 2). Lag 3 korte og varierte spørsmål som tester forståelse av enheter i temaet "${topic}". 
+            Viktig: Svar kun med de 3 spørsmålene adskilt med "###". Ingen introduksjon eller avslutning.`;
 
             try {
-                const text = await safeFetchKI(prompt);
+                const text = await callMistral(prompt);
                 const qArray = text.split('###').map(s => s.trim()).filter(s => s.length > 5);
                 
                 grid.innerHTML = '';
@@ -247,12 +243,12 @@
                                 <div class="q-text">${q}</div>
                                 <div style="margin-top:1rem;">
                                     <input type="text" id="ans-${i}" placeholder="Ditt svar..." onkeypress="if(event.key==='Enter') check(${i}, '${q.replace(/'/g, "\\'")}')">
-                                    <button class="btn" style="width:100%" onclick="check(${i}, '${q.replace(/'/g, "\\'")}')">Sjekk svar</button>
+                                    <button id="btn-${i}" class="btn" style="width:100%" onclick="check(${i}, '${q.replace(/'/g, "\\'")}')">Sjekk svar</button>
                                 </div>
                             </div>
                             <div class="card-face card-back">
-                                <div class="q-label">Vurdering</div>
-                                <div id="feedback-${i}" style="font-size:0.95rem; line-height:1.4;"></div>
+                                <div class="q-label">Vurdering fra Mistral</div>
+                                <div id="feedback-${i}" style="font-size:0.95rem; line-height:1.4; overflow-y:auto; max-height:200px;"></div>
                                 <button class="btn" style="margin-top:1.5rem; background:#cbd5e1; color:#334155" onclick="flip(${i})">Tilbake</button>
                             </div>
                         </div>
@@ -260,25 +256,28 @@
                     grid.appendChild(div);
                 });
             } catch (err) {
-                grid.innerHTML = `<div class="error-msg"><strong>Feil:</strong> ${err.message}<br><br>Dette skyldes ofte restriksjoner i Canvas-nettverket eller API-nøkkelen.</div>`;
+                grid.innerHTML = `<div class="error-msg"><strong>Feil:</strong> ${err.message}<br><br><small>Tips: Sjekk at API-nøkkelen er riktig og at du har internett-tilgang.</small></div>`;
             }
         }
 
         async function check(id, question) {
-            const answer = document.getElementById(`ans-${id}`).value;
+            const answerInput = document.getElementById(`ans-${id}`);
+            const answer = answerInput.value.trim();
             if (!answer) return;
 
             flip(id);
             const feedbackElem = document.getElementById(`feedback-${id}`);
-            feedbackElem.innerHTML = '<div class="loader"></div>';
+            feedbackElem.innerHTML = '<div class="loader" style="margin-top:2rem;"></div>';
 
-            const prompt = `Spørsmål: "${question}". Elevens svar: "${answer}". Er dette korrekt enhetsbruk i fysikk? Svar kort (maks 25 ord).`;
+            const prompt = `Du er en fysikklærer. En elev fikk spørsmålet: "${question}".
+            Elevens svar er: "${answer}". 
+            Vurder om svaret er korrekt i forhold til enhetsbruk. Svar kort og presist (maks 40 ord).`;
 
             try {
-                const result = await safeFetchKI(prompt);
+                const result = await callMistral(prompt);
                 feedbackElem.innerHTML = result;
             } catch (err) {
-                feedbackElem.innerHTML = "Kunne ikke hente vurdering.";
+                feedbackElem.innerHTML = "Kunne ikke hente vurdering fra Mistral.";
             }
         }
 
