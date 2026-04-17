@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sokrates - Læringsassistent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+
+        .chat-container {
+            height: calc(100vh - 160px);
+        }
+
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Velkomstskjerm -->
+    <div id="setup-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-50">
+        <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl border border-gray-100">
+            <div class="flex justify-center mb-4">
+                <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">S</div>
+            </div>
+            <h1 class="text-2xl font-semibold mb-2 text-center text-gray-800">Sokrates Læringsassistent</h1>
+            <p class="text-sm text-gray-500 mb-6 text-center">Systemet er klart med din personlige konfigurasjon.</p>
+            <div class="space-y-4">
+                <button id="start-app-btn" 
+                    class="w-full bg-blue-600 text-white font-medium py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md">
+                    Start samtale
+                </button>
+            </div>
+            <p class="mt-6 text-[10px] text-gray-400 text-center uppercase tracking-widest border-t pt-4">Sikkerhet: Maskert tilgang</p>
+        </div>
+    </div>
+
+    <!-- Hovedgrensesnitt -->
+    <div id="app-interface" class="hidden max-w-3xl mx-auto h-screen flex flex-col p-4 md:p-6">
+        
+        <header class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-md">S</div>
+                <div>
+                    <h2 class="font-semibold text-gray-800">Sokrates</h2>
+                    <p class="text-xs text-green-500 flex items-center gap-1">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Veileder er klar
+                    </p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Chat-historikk -->
+        <div id="chat-history" class="chat-container overflow-y-auto space-y-4 mb-4 pr-2">
+            <div class="flex justify-start">
+                <div class="bg-white border border-gray-200 rounded-2xl px-4 py-3 max-w-[85%] shadow-sm">
+                    <p class="text-sm text-gray-700">Velkommen. Jeg er her for å hjelpe deg med å utforske dine egne tanker. Hva ønsker du å snakke om?</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input-felt -->
+        <div class="mt-auto">
+            <div id="status-indicator" class="hidden mb-2 px-2">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <div class="spinner"></div>
+                    <span>Sokrates tenker...</span>
+                </div>
+            </div>
+            <form id="chat-form" class="relative">
+                <input type="text" id="user-input" 
+                    placeholder="Skriv her..." 
+                    class="w-full bg-white border border-gray-200 rounded-2xl pl-4 pr-12 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all"
+                    autocomplete="off">
+                <button type="submit" 
+                    class="absolute right-2 top-2 bottom-2 bg-blue-600 text-white px-4 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Ny metode for å sette sammen nøkkelen for å unngå Base64-problemer
+        // Vi splitter nøkkelen i to deler
+        const _p1 = "DyZF2pimEtkcueEb3chAj0";
+        const _p2 = "ITe8YqLFXk";
+        
+        const getAuthKey = () => (_p1 + _p2).trim();
+
+        let messageCount = 0;
+        const chatHistory = [
+            { role: "assistant", content: "Velkommen. Jeg er her for å hjelpe deg med å utforske dine egne tanker. Hva ønsker du å snakke om?" }
+        ];
+
+        const setupScreen = document.getElementById('setup-screen');
+        const appInterface = document.getElementById('app-interface');
+        const startBtn = document.getElementById('start-app-btn');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatDisplay = document.getElementById('chat-history');
+        const statusIndicator = document.getElementById('status-indicator');
+
+        startBtn.addEventListener('click', () => {
+            setupScreen.classList.add('hidden');
+            appInterface.classList.remove('hidden');
+        });
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            addMessageToUI('user', text);
+            userInput.value = '';
+            messageCount++;
+
+            let systemPrompt = `Du er den greske filosofen Sokrates. Din oppgave er å veilede eleven.
+                VIKTIGE REGLER:
+                1. De 3 første gangene eleven svarer, skal du KUN stille oppfølgingsspørsmål. Du skal ikke gi svar eller forklaringer.
+                2. Ved det 4. svaret fra eleven skal du:
+                   - Oppsummere det eleven har sagt.
+                   - Fortelle hva de bør øve mer på basert på samtalen.
+                   - Spørre om de vil øve mer eller ha en kort forklaring.
+                Svar på norsk, vær tålmodig og utfordrende.`;
+
+            chatHistory.push({ role: "user", content: text });
+            await getSocratesResponse(systemPrompt);
+        });
+
+        async function getSocratesResponse(systemPrompt) {
+            statusIndicator.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAuthKey()}`
+                    },
+                    body: JSON.stringify({
+                        model: "open-mistral-7b",
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            ...chatHistory
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.detail || `Status ${response.status}`);
+                }
+
+                const data = await response.json();
+                const aiText = data.choices[0].message.content;
+                
+                chatHistory.push({ role: "assistant", content: aiText });
+                addMessageToUI('assistant', aiText);
+
+            } catch (error) {
+                console.error("Feil ved henting av svar:", error);
+                addMessageToUI('assistant', `Det oppsto en feil (${error.message}). Vennligst sjekk at API-nøkkelen er gyldig og aktiv hos Mistral.`);
+            } finally {
+                statusIndicator.classList.add('hidden');
+            }
+        }
+
+        function addMessageToUI(role, text) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = role === 'user' 
+                ? 'bg-blue-600 text-white rounded-2xl px-4 py-3 max-w-[85%] shadow-md' 
+                : 'bg-white border border-gray-200 rounded-2xl px-4 py-3 max-w-[85%] shadow-sm text-gray-700';
+            
+            bubble.textContent = text;
+            wrapper.appendChild(bubble);
+            chatDisplay.appendChild(wrapper);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+    </script>
+</body>
+</html>
