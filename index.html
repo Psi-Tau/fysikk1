@@ -9,6 +9,7 @@
             --primary: #2c3e50;
             --fys1: #3498db;
             --fys2: #e67e22;
+            --bot: #9b59b6;
             --bg: #f4f7f6;
         }
 
@@ -38,6 +39,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
+            margin-bottom: 40px;
         }
 
         .subject-card {
@@ -58,6 +60,18 @@
             box-shadow: 0 12px 25px rgba(0,0,0,0.1);
         }
 
+        /* Spesialstil for tom plass / kommer snart */
+        .placeholder-card {
+            background: rgba(255,255,255,0.5);
+            border: 2px dashed #cbd5e1;
+            border-bottom: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            min-height: 250px;
+        }
+
         .card-header {
             padding: 30px;
             text-align: center;
@@ -67,6 +81,7 @@
 
         .fys1-head { background: var(--fys1); }
         .fys2-head { background: var(--fys2); }
+        .bot-head { background: var(--bot); }
 
         .card-body {
             padding: 25px;
@@ -93,6 +108,10 @@
             font-size: 0.9rem;
         }
 
+        .audio-player {
+            margin: 20px 0;
+        }
+
         footer {
             margin-top: auto;
             padding: 30px;
@@ -109,6 +128,7 @@
     </header>
 
     <div class="container">
+        <!-- Lab -->
         <a href="lab/index.html" class="subject-card" style="border-color: var(--fys1);">
             <div class="card-header fys1-head">🔬</div>
             <div class="card-body">
@@ -118,6 +138,7 @@
             </div>
         </a>
 
+        <!-- Oppgaver -->
         <a href="oppgaver/index.html" class="subject-card" style="border-color: var(--fys2);">
             <div class="card-header fys2-head">📝</div>
             <div class="card-body">
@@ -126,6 +147,24 @@
                 <div class="btn-enter" style="background: var(--fys2);">Åpne oppgaver</div>
             </div>
         </a>
+
+        <!-- Boten Sokrates -->
+        <a href="bot/sokrates.html" class="subject-card" style="border-color: var(--bot);">
+            <div class="card-header bot-head">🏛️</div>
+            <div class="card-body">
+                <h2>Sokrates</h2>
+                <p>Diskuter fysikk-konsepter med vår AI-bot.</p>
+                <div class="btn-enter" style="background: var(--bot);">Snakk med Sokrates</div>
+            </div>
+        </a>
+
+        <!-- Tom plass / Kommer senere -->
+        <div class="subject-card placeholder-card">
+            <div class="card-body">
+                <p style="font-size: 1.5rem; margin: 0;">➕</p>
+                <p>Kommer snart...</p>
+            </div>
+        </div>
     </div>
 
     <div class="audio-player">
