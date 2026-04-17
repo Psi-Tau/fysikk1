@@ -3,310 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fysikk 2 - Enhetsøving med Mistral AI</title>
+    <title>Fysikk 2: Dynamiske Flashcards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --bg: #f8fafc;
-            --text: #0f172a;
-            --card-front: #ffffff;
-            --card-back: #f0f9ff;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 1rem;
-        }
-
-        #setup-screen {
-            position: fixed;
-            inset: 0;
-            background: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .setup-card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 450px;
-            width: 90%;
-            border: 1px solid #e2e8f0;
-        }
-
-        input[type="password"], input[type="text"] {
-            width: 100%;
-            padding: 0.8rem;
-            margin: 1rem 0;
-            border: 2px solid #e2e8f0;
-            border-radius: 0.6rem;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-
-        #app-content {
-            display: none; 
-            width: 100%;
-            max-width: 1000px;
-            flex-direction: column;
-        }
-
-        header { text-align: center; margin-bottom: 2rem; }
-        h1 { color: var(--primary); margin-bottom: 0.5rem; }
-
-        .topic-selector {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 2rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 0.6rem;
-            background-color: var(--primary);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn:hover { background-color: var(--primary-dark); transform: translateY(-1px); }
-        .btn:disabled { background-color: #94a3b8; cursor: not-allowed; transform: none; }
-
-        .flashcards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .card-container { perspective: 1000px; height: 380px; }
-        .card {
-            position: relative;
-            width: 100%;
-            height: 100%;
+        .perspective-1000 { perspective: 1000px; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        
+        .card-inner {
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
         }
-        .card.is-flipped { transform: rotateY(180deg); }
-
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 1rem;
-            padding: 2rem;
-            box-sizing: border-box;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-front { background: var(--card-front); }
-        .card-back { background: var(--card-back); transform: rotateY(180deg); text-align: center; justify-content: center; }
-
-        .q-label { font-weight: 800; color: var(--primary); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem; }
-        .q-text { font-size: 1.1rem; flex-grow: 1; display: flex; align-items: center; }
-
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin: auto;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .error-msg {
-            background: #fef2f2;
-            color: #b91c1c;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #fee2e2;
-            margin-top: 1rem;
-            font-size: 0.85rem;
-            text-align: left;
-            word-break: break-all;
+        .card-flipped .card-inner {
+            transform: rotateY(180deg);
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen font-sans text-slate-900">
 
-    <div id="setup-screen">
-        <div class="setup-card">
-            <h2>Fysikk 2 Enhetstrener</h2>
-            <p>Skriv inn din Mistral API-nøkkel for å starte.</p>
-            <input type="password" id="api-key-input" placeholder="Lim inn Mistral API-nøkkel her...">
-            <button class="btn" style="width:100%" onclick="startApp()">Bekreft og start</button>
-            <p id="setup-error" style="color:red; font-size:0.8rem; margin-top:10px; display:none;">Vennligst oppgi en gyldig nøkkel.</p>
+    <!-- API Key Overlay -->
+    <div id="api-overlay" class="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-4 text-center text-slate-800">Aktiver Fysikk-Hjelperen</h2>
+            <p class="text-slate-600 mb-6 text-sm text-center">Skriv inn din Mistral API-nøkkel for å få smarte tilbakemeldinger på svarene dine.</p>
+            <input type="password" id="api-key-input" placeholder="Mistral API Key" class="w-full p-3 border border-slate-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+            <button onclick="saveApiKey()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition transform active:scale-95 shadow-lg">Start Økt</button>
         </div>
     </div>
 
-    <div id="app-content">
-        <header>
-            <h1>Enhetstrener (Mistral AI)</h1>
-            <p>Mekanikk, Felt og Induksjon</p>
-            <button onclick="location.reload()" style="background:none; border:none; color:var(--primary); cursor:pointer; font-size:0.8rem; text-decoration:underline;">Bytt API-nøkkel</button>
+    <!-- Main Content -->
+    <main id="main-content" class="max-w-6xl mx-auto py-8 px-6 hidden">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight italic uppercase">Enhetstest: Fysikk 2</h1>
+            <p id="status-text" class="text-slate-500 mt-2 font-medium">Velg et emne for å trene på enheter fra læreplanen</p>
         </header>
 
-        <div class="topic-selector">
-            <button class="btn" onclick="loadQuestions('Mekanikk')">Mekanikk</button>
-            <button class="btn" onclick="loadQuestions('Felt')">Felt</button>
-            <button class="btn" onclick="loadQuestions('Induksjon')">Induksjon</button>
+        <!-- Topic Selection -->
+        <div id="topic-selection" class="flex flex-wrap justify-center gap-4 mb-10">
+            <button onclick="pickCards('Mekanikk')" class="px-6 py-3 bg-white hover:bg-blue-50 border border-slate-200 rounded-full shadow-sm transition font-bold flex items-center gap-2">
+                <span>🏎️</span> Mekanikk
+            </button>
+            <button onclick="pickCards('Felt og Induksjon')" class="px-6 py-3 bg-white hover:bg-blue-50 border border-slate-200 rounded-full shadow-sm transition font-bold flex items-center gap-2">
+                <span>🧲</span> Felt & Induksjon
+            </button>
+            <button onclick="pickCards('Moderne Fysikk')" class="px-6 py-3 bg-white hover:bg-blue-50 border border-slate-200 rounded-full shadow-sm transition font-bold flex items-center gap-2">
+                <span>⚛️</span> Moderne Fysikk
+            </button>
         </div>
 
-        <div id="grid" class="flashcards-grid">
-            <div style="grid-column: 1/-1; text-align: center; color: #64748b; padding-top: 3rem;">
-                Velg et emne for å generere oppgaver med open-mistral-7b...
-            </div>
+        <!-- Cards Grid -->
+        <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 opacity-0 transition-opacity duration-500">
+            <!-- Cards injected here -->
         </div>
-    </div>
+    </main>
 
     <script>
         let apiKey = "";
+        let currentCards = [];
 
-        function startApp() {
-            const input = document.getElementById('api-key-input').value.trim();
-            if (input.length < 5) {
-                document.getElementById('setup-error').style.display = 'block';
-                return;
-            }
+        const taskBank = {
+            "Mekanikk": [
+                { q: "Hva er enheten for kraft?", a: "Newton, N" },
+                { q: "Hva er enheten for bevegelsesmengde (impuls)?", a: "Newtonsekund, Ns (eller kg m/s)" },
+                { q: "Hva er enheten for energi og arbeid?", a: "Joule, J" },
+                { q: "Hva er enheten for effekt?", a: "Watt, W" },
+                { q: "Hva er enheten for kraftmoment?", a: "Newtonmeter, Nm" },
+                { q: "Hva er enheten for vinkelfart?", a: "Radianer per sekund, rad/s" },
+                { q: "Hva er enheten for banefart?", a: "Meter per sekund, m/s" }
+            ],
+            "Felt og Induksjon": [
+                { q: "Hva er enheten for magnetisk flukstetthet?", a: "Tesla, T" },
+                { q: "Hva er enheten for magnetisk fluks?", a: "Weber, Wb" },
+                { q: "Hva er enheten for induktans?", a: "Henry, H" },
+                { q: "Hva er enheten for elektrisk feltstyrke?", a: "Newton per coulomb, N/C (eller V/m)" },
+                { q: "Hva er enheten for elektrisk potensial?", a: "Volt, V" },
+                { q: "Hva er enheten for elektrisk ladning?", a: "Coulomb, C" },
+                { q: "Hva er enheten for kapasitans?", a: "Farad, F" }
+            ],
+            "Moderne Fysikk": [
+                { q: "Hva er enheten for aktivitet i et radioaktivt stoff?", a: "Becquerel, Bq" },
+                { q: "Hva er enheten for absorbert dose?", a: "Gray, Gy" },
+                { q: "Hva er enheten for ekvivalent dose?", a: "Sievert, Sv" },
+                { q: "Hva er enheten for fotonenergi?", a: "Joule, J (eller elektronvolt, eV)" },
+                { q: "Hva er enheten for Plancks konstant?", a: "Joulesekund, Js" },
+                { q: "Hva er enheten for bølgelengde?", a: "Meter, m" }
+            ]
+        };
+
+        function saveApiKey() {
+            const input = document.getElementById('api-key-input').value;
+            if (input.length < 5) return;
             apiKey = input;
-            document.getElementById('setup-screen').style.display = 'none';
-            document.getElementById('app-content').style.display = 'flex';
+            document.getElementById('api-overlay').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
         }
 
-        async function callMistral(prompt) {
-            // Prøver direkte anrop først (fungerer ofte på GitHub/Netlify)
-            const url = "https://api.mistral.ai/v1/chat/completions";
+        function pickCards(topic) {
+            const grid = document.getElementById('cards-grid');
+            const statusText = document.getElementById('status-text');
+            const allTasks = [...taskBank[topic]];
+            const shuffled = allTasks.sort(() => 0.5 - Math.random());
+            currentCards = shuffled.slice(0, 4);
+            renderCards();
+            grid.classList.remove('opacity-0');
+            statusText.innerText = `Viser 4 tilfeldige oppgaver om ${topic}`;
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('cards-grid');
+            grid.innerHTML = currentCards.map((data, index) => `
+                <div id="card-${index}" class="perspective-1000 w-full h-80 group">
+                    <div class="card-inner relative w-full h-full shadow-lg rounded-2xl cursor-pointer">
+                        <div class="absolute inset-0 backface-hidden bg-white rounded-2xl p-6 flex flex-col items-center justify-between border border-slate-200 group-hover:border-blue-400 transition-all">
+                            <div class="w-full text-center">
+                                <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Oppgave ${index + 1}</span>
+                                <h3 class="text-lg font-bold text-slate-800 mt-4 leading-tight">${data.q}</h3>
+                            </div>
+                            <div class="w-full">
+                                <label class="text-[10px] text-slate-400 mb-1 block font-bold text-center italic">Navn og symbol (f.eks. Newton, N)</label>
+                                <input type="text" id="ans-${index}" placeholder="Svar her..." 
+                                       onclick="event.stopPropagation()"
+                                       onkeypress="if(event.key==='Enter') evaluateCard(${index}, event)"
+                                       class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-center text-sm transition-all shadow-inner">
+                            </div>
+                            <button onclick="evaluateCard(${index}, event)" class="w-full bg-slate-800 text-white text-xs font-bold py-3 rounded-xl hover:bg-blue-600 transition shadow-md active:scale-95 uppercase tracking-wide">Sjekk Svar</button>
+                        </div>
+                        <div class="absolute inset-0 backface-hidden rotate-y-180 bg-emerald-600 rounded-2xl p-6 flex flex-col text-white overflow-hidden shadow-2xl border-4 border-emerald-500">
+                            <h4 class="text-[10px] font-black uppercase opacity-80 mb-2 tracking-tighter text-emerald-100">Lærerens vurdering</h4>
+                            <div id="feedback-${index}" class="text-sm leading-snug font-medium italic">
+                                <div class="flex justify-center py-4 text-emerald-200 text-xs animate-pulse font-bold uppercase tracking-widest">Analyserer svaret...</div>
+                            </div>
+                            <button onclick="flipBack(${index})" class="mt-auto bg-emerald-500 hover:bg-emerald-400 text-white text-[10px] font-bold py-2 rounded-lg transition border border-emerald-400/30">Gå tilbake</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function evaluateCard(index, event) {
+            event.stopPropagation();
+            const cardElement = document.getElementById(`card-${index}`);
+            const userAnswer = document.getElementById(`ans-${index}`).value;
+            const feedbackBox = document.getElementById(`feedback-${index}`);
             
+            if (!userAnswer.trim()) return;
+            cardElement.classList.add('card-flipped');
+
+            // Oppdatert instruks for strengere, men positiv vurdering
+            const systemPrompt = `Du er en positiv fysikklærer. Eleven skal svare med BÅDE enhetsnavn og symbol. 
+            VURDERINGSKRITERIER:
+            1. Sjekk om BÅDE navnet og symbolet er med.
+            2. Hvis kun symbolet er med (f.eks. 'm/s'): Si at symbolet er rett, men minn vennlig på at de glemte navnet.
+            3. Start alltid med å anerkjenne det som er bra.
+            4. Vær kort (maks 2-3 setninger).`;
+            
+            const userPrompt = `Oppgave: ${currentCards[index].q}. Fasit: ${currentCards[index].a}. Elevens svar: "${userAnswer}"`;
+
             try {
-                const response = await fetch(url, {
-                    method: 'POST',
+                const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
                     },
                     body: JSON.stringify({
                         model: "open-mistral-7b",
-                        messages: [{ role: "user", content: prompt }]
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            { role: "user", content: userPrompt }
+                        ],
+                        temperature: 0.3 // Lavere temperatur for mer presis sjekk
                     })
                 });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    let errorData;
-                    try { errorData = JSON.parse(errorText); } catch(e) { errorData = { message: errorText }; }
-                    throw new Error(`Mistral API feil (${response.status}): ${errorData.message || 'Ukjent feil'}`);
-                }
-
                 const data = await response.json();
-                return data.choices[0].message.content;
-            } catch (err) {
-                // Hvis direkte anrop feiler pga CORS (lokalt), prøver vi med proxy som fallback
-                if (err.message.includes('fetch') || err.message.includes('CORS')) {
-                    console.log("Prøver med proxy-fallback...");
-                    const proxyUrl = "https://corsproxy.io/?";
-                    const encodedUrl = encodeURIComponent(url);
-                    const proxyResponse = await fetch(proxyUrl + encodedUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKey}`
-                        },
-                        body: JSON.stringify({
-                            model: "open-mistral-7b",
-                            messages: [{ role: "user", content: prompt }]
-                        })
-                    });
-                    
-                    if (!proxyResponse.ok) throw new Error("Både direkte og proxy-anrop feilet.");
-                    const data = await proxyResponse.json();
-                    return data.choices[0].message.content;
-                }
-                throw err;
+                feedbackBox.innerText = data.choices[0].message.content;
+            } catch (error) {
+                feedbackBox.innerText = "Klarte ikke koble til læreren, men fasiten er: " + currentCards[index].a;
             }
         }
 
-        async function loadQuestions(topic) {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '<div style="grid-column:1/-1; text-align:center;"><div class="loader"></div><p>Mistral genererer oppgaver om ' + topic + '...</p></div>';
-
-            const prompt = `Du er en fysikklærer. Lag 3 korte spørsmål om enheter i "${topic}". Svar kun med spørsmålene adskilt med "###".`;
-
-            try {
-                const text = await callMistral(prompt);
-                const qArray = text.split('###').map(s => s.trim()).filter(s => s.length > 5);
-                
-                grid.innerHTML = '';
-                qArray.slice(0, 3).forEach((q, i) => {
-                    const div = document.createElement('div');
-                    div.className = 'card-container';
-                    div.innerHTML = `
-                        <div class="card" id="card-${i}">
-                            <div class="card-face card-front">
-                                <div class="q-label">Spørsmål ${i+1}</div>
-                                <div class="q-text">${q}</div>
-                                <div style="margin-top:1rem;">
-                                    <input type="text" id="ans-${i}" placeholder="Ditt svar..." onkeypress="if(event.key==='Enter') check(${id}, '${q.replace(/'/g, "\\'")}')">
-                                    <button id="btn-${i}" class="btn" style="width:100%" onclick="check(${i}, '${q.replace(/'/g, "\\'")}')">Sjekk svar</button>
-                                </div>
-                            </div>
-                            <div class="card-face card-back">
-                                <div class="q-label">Vurdering</div>
-                                <div id="feedback-${i}" style="font-size:0.95rem; line-height:1.4;"></div>
-                                <button class="btn" style="margin-top:1.5rem; background:#cbd5e1; color:#334155" onclick="flip(${i})">Tilbake</button>
-                            </div>
-                        </div>
-                    `;
-                    grid.appendChild(div);
-                });
-            } catch (err) {
-                grid.innerHTML = `<div class="error-msg"><strong>Feil:</strong> ${err.message}</div>`;
-            }
-        }
-
-        async function check(id, question) {
-            const answerInput = document.getElementById(`ans-${id}`);
-            const answer = answerInput.value.trim();
-            if (!answer) return;
-
-            flip(id);
-            const feedbackElem = document.getElementById(`feedback-${id}`);
-            feedbackElem.innerHTML = '<div class="loader" style="margin-top:2rem;"></div>';
-
-            const prompt = `Elev svarte "${answer}" på "${question}". Er det rett? Forklar kort (maks 30 ord).`;
-
-            try {
-                const result = await callMistral(prompt);
-                feedbackElem.innerHTML = result;
-            } catch (err) {
-                feedbackElem.innerHTML = "Feil ved henting av vurdering.";
-            }
-        }
-
-        function flip(id) {
-            document.getElementById(`card-${id}`).classList.toggle('is-flipped');
+        function flipBack(index) {
+            document.getElementById(`card-${index}`).classList.remove('card-flipped');
         }
     </script>
 </body>
