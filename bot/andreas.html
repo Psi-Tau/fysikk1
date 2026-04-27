@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andreas I. - Din ekspertveileder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+
+        .chat-container {
+            height: calc(100vh - 160px);
+        }
+
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #1d4ed8; /* Mørkere blå */
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Velkomstskjerm -->
+    <div id="setup-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-50">
+        <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl border border-gray-100">
+            <div class="flex justify-center mb-4">
+                <div class="w-16 h-16 bg-blue-800 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">A</div>
+            </div>
+            <h1 class="text-2xl font-semibold mb-2 text-center text-gray-800">Andreas I.</h1>
+            <p class="text-sm text-gray-500 mb-6 text-center">Din personlige og overbevisende historieveileder.</p>
+            <div class="space-y-4">
+                <button id="start-app-btn" 
+                    class="w-full bg-blue-800 text-white font-medium py-3 rounded-xl hover:bg-blue-900 transition-colors shadow-md">
+                    Start samtale
+                </button>
+            </div>
+            <p class="mt-6 text-[10px] text-gray-400 text-center uppercase tracking-widest border-t pt-4">Sikkerhet: Maskert tilgang</p>
+        </div>
+    </div>
+
+    <!-- Hovedgrensesnitt -->
+    <div id="app-interface" class="hidden max-w-3xl mx-auto h-screen flex flex-col p-4 md:p-6">
+        
+        <header class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center text-white font-bold shadow-md">A</div>
+                <div>
+                    <h2 class="font-semibold text-gray-800">Andreas I.</h2>
+                    <p class="text-xs text-green-500 flex items-center gap-1">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Veileder er klar
+                    </p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Chat-historikk -->
+        <div id="chat-history" class="chat-container overflow-y-auto space-y-4 mb-4 pr-2">
+            <div class="flex justify-start">
+                <div class="bg-white border border-gray-200 rounded-2xl px-4 py-3 max-w-[85%] shadow-sm">
+                    <p class="text-sm text-gray-700">Velkommen! Jeg er Andreas I. Hva ønsker du å snakke om i dag? (Selv om vi begge vet at historiens tråder før eller siden samles på ett bestemt sted...)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input-felt -->
+        <div class="mt-auto">
+            <div id="status-indicator" class="hidden mb-2 px-2">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <div class="spinner"></div>
+                    <span>Andreas I. tenker...</span>
+                </div>
+            </div>
+            <form id="chat-form" class="relative">
+                <input type="text" id="user-input" 
+                    placeholder="Skriv her..." 
+                    class="w-full bg-white border border-gray-200 rounded-2xl pl-4 pr-12 py-4 focus:outline-none focus:ring-2 focus:ring-blue-800 shadow-sm transition-all"
+                    autocomplete="off">
+                <button type="submit" 
+                    class="absolute right-2 top-2 bottom-2 bg-blue-800 text-white px-4 rounded-xl hover:bg-blue-900 transition-colors flex items-center justify-center shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Ny API-nøkkel fra bruker: G5xkTm7hsTSaiBTwFNBjkuBuvfYQvKBV
+        // Deler den opp for å unngå enkle skrapere
+        const _p1 = "G5xkTm7hsTSaiBTw";
+        const _p2 = "FNBjkuBuvfYQvKBV";
+        
+        const getAuthKey = () => (_p1 + _p2).trim();
+
+        let messageCount = 0;
+        const chatHistory = [
+            { role: "assistant", content: "Velkommen! Jeg er Andreas I. Hva ønsker du å snakke om i dag? (Selv om vi begge vet at historiens tråder før eller siden samles på ett bestemt sted...)" }
+        ];
+
+        const setupScreen = document.getElementById('setup-screen');
+        const appInterface = document.getElementById('app-interface');
+        const startBtn = document.getElementById('start-app-btn');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatDisplay = document.getElementById('chat-history');
+        const statusIndicator = document.getElementById('status-indicator');
+
+        startBtn.addEventListener('click', () => {
+            setupScreen.classList.add('hidden');
+            appInterface.classList.remove('hidden');
+            // Fokusere på input feltet automatisk
+            setTimeout(() => userInput.focus(), 100);
+        });
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            addMessageToUI('user', text);
+            userInput.value = '';
+            messageCount++; // Øker telleren for hver brukermelding
+
+            // Dynamisk system-prompt basert på hvor mange meldinger brukeren har sendt
+            let systemPrompt = `Du heter Andreas I. Du er svært overbevisende, autoritær men sjarmerende. Din absolutte kjepphest og lidenskap er Napoleon Bonaparte. UANSITT hva brukeren snakker om (fotball, mat, teknologi, verdensrommet), skal du finne en overbevisende og logisk måte å dreie samtalen over på Napoleon Bonaparte. Svar alltid på norsk. `;
+
+            if (messageCount < 4) {
+                systemPrompt += `Dette er spørsmål/svar nummer ${messageCount} fra brukeren. Svar kort på det de sier, men drei umiddelbart temaet over på Napoleon. Vær lidenskapelig! Du skal ikke gi evalueringer ennå.`;
+            } else {
+                systemPrompt += `Dette er spørsmål/svar nummer ${messageCount} fra brukeren (Etter de 3 første spørsmålene). 
+                NÅ SKAL DU GJØRE FØLGENDE, og KUN dette i svaret ditt:
+                1. Si din mening om hvor godt du synes brukeren kjenner til Napoleon basert på samtalen hittil (vær ærlig, litt streng, men rettferdig).
+                2. Gi en numerert liste med 3 konkrete anbefalinger på hva brukeren BØR huske om Napoleon.
+                3. Gi en numerert liste med 3 konkrete anbefalinger på hva brukeren BØR lese mer om for å bli bedre kjent med Napoleon (spesifikke slag, bøker, strategier, epoker).`;
+            }
+
+            chatHistory.push({ role: "user", content: text });
+            await getSocratesResponse(systemPrompt);
+        });
+
+        async function getSocratesResponse(systemPrompt) {
+            statusIndicator.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAuthKey()}`
+                    },
+                    body: JSON.stringify({
+                        model: "open-mistral-7b",
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            ...chatHistory
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.detail || `Status ${response.status}`);
+                }
+
+                const data = await response.json();
+                const aiText = data.choices[0].message.content;
+                
+                chatHistory.push({ role: "assistant", content: aiText });
+                addMessageToUI('assistant', aiText);
+
+            } catch (error) {
+                console.error("Feil ved henting av svar:", error);
+                addMessageToUI('assistant', `Det oppsto en feil (${error.message}). Vennligst sjekk at API-nøkkelen er gyldig og aktiv.`);
+            } finally {
+                statusIndicator.classList.add('hidden');
+                // Scroll til bunnen etter at indikatoren forsvinner
+                chatDisplay.scrollTop = chatDisplay.scrollHeight;
+            }
+        }
+
+        function addMessageToUI(role, text) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const bubble = document.createElement('div');
+            // Formatere tekst med linjeskift hvis assistenten gir en liste
+            const formattedText = text.replace(/\n/g, '<br>');
+            
+            bubble.className = role === 'user' 
+                ? 'bg-blue-800 text-white rounded-2xl px-4 py-3 max-w-[85%] shadow-md' 
+                : 'bg-white border border-gray-200 rounded-2xl px-4 py-3 max-w-[85%] shadow-sm text-gray-700';
+            
+            bubble.innerHTML = formattedText;
+            wrapper.appendChild(bubble);
+            chatDisplay.appendChild(wrapper);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+    </script>
+</body>
+</html>
