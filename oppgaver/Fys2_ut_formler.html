@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<title>Hvem skal ut – Fysikk 2</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        margin: 0;
+        padding: 20px;
+    }
+    .container {
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+        text-align: center;
+    }
+    .question {
+        margin-bottom: 20px;
+    }
+    .options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    button.option {
+        padding: 12px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #f9f9f9;
+    }
+    button.option:hover {
+        background: #e6f0ff;
+    }
+    .hidden {
+        display: none;
+    }
+    .result {
+        text-align: center;
+        font-size: 20px;
+        margin-top: 20px;
+    }
+    .pdf-btn {
+        display: block;
+        margin: 20px auto;
+        padding: 12px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 6px;
+        border: none;
+        background: #0078d4;
+        color: white;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Hvem skal ut?</h1>
+    <h2>Fysikk 2 – formler og enheter</h2>
+
+    <div id="quiz"></div>
+
+    <div id="result" class="result hidden"></div>
+    <button id="pdfBtn" class="pdf-btn hidden">Last ned PDF med resultat</button>
+</div>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+const questions = [
+    {
+        text: "Hvem skal ut?",
+        options: ["E = hf", "E = mc²", "E = ½mv²", "E = IR"],
+        correct: 3
+    },
+    {
+        text: "Hvem skal ut?",
+        options: ["F = ma", "F = GmM/r²", "F = qvB", "F = UI"],
+        correct: 3
+    },
+    {
+        text: "Hvem skal ut?",
+        options: ["Joule (J)", "Newton (N)", "Watt (W)", "Kilogram (kg)"],
+        correct: 3
+    },
+    {
+        text: "Hvem skal ut?",
+        options: ["p = mv", "p = h/λ", "p = γmv", "p = It"],
+        correct: 3
+    },
+    {
+        text: "Hvem skal ut?",
+        options: ["U = IR", "P = UI", "R = U/I", "E = hf"],
+        correct: 3
+    },
+    {
+        text: "Hvem skal ut?",
+        options: ["λ = h/p", "E = hf", "c = fλ", "E = IR"],
+        correct: 3
+    },
+    {
+        text: "Hvem skal ut?",
+        options: ["B = Φ/A", "Φ = BAcosα", "ε = -N dΦ/dt", "F = kx"],
+        correct: 3
+    },
+    {
+        text: "Hvem skal ut?",
+        options: ["γ = 1/√(1−v²/c²)", "E = γmc²", "p = γmv", "F = ma"],
+        correct: 3
+    },
+    {
+        text: "Hvem skal ut?",
+        options: ["m/s", "m/s²", "N", "J/s²"],
+        correct: 3
+    },
+    {
+        text: "Hvem skal ut?",
+        options: ["Ep = mgh", "Ek = ½mv²", "E = mc²", "U = IR"],
+        correct: 3
+    }
+];
+
+let current = 0;
+let score = 0;
+
+const quizDiv = document.getElementById("quiz");
+const resultDiv = document.getElementById("result");
+const pdfBtn = document.getElementById("pdfBtn");
+
+function showQuestion() {
+    quizDiv.innerHTML = "";
+    if (current >= questions.length) {
+        showResult();
+        return;
+    }
+
+    const q = questions[current];
+    const qDiv = document.createElement("div");
+    qDiv.className = "question";
+    qDiv.innerHTML = `<h3>Oppgave ${current + 1} av ${questions.length}</h3><p>${q.text}</p>`;
+
+    const optionsDiv = document.createElement("div");
+    optionsDiv.className = "options";
+
+    q.options.forEach((opt, index) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.textContent = opt;
+        btn.onclick = () => {
+            if (index === q.correct) score++;
+            current++;
+            showQuestion();
+        };
+        optionsDiv.appendChild(btn);
+    });
+
+    qDiv.appendChild(optionsDiv);
+    quizDiv.appendChild(qDiv);
+}
+
+function showResult() {
+    quizDiv.innerHTML = "";
+    resultDiv.classList.remove("hidden");
+    pdfBtn.classList.remove("hidden");
+    resultDiv.textContent = `Du fikk ${score} av ${questions.length} riktige.`;
+}
+
+pdfBtn.onclick = () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.text("Resultat – Hvem skal ut (Fysikk 2)", 10, 20);
+    doc.text(`Antall riktige: ${score} av ${questions.length}`, 10, 40);
+    doc.text(`Dato: ${new Date().toLocaleDateString()}`, 10, 60);
+
+    doc.save("resultat_fysikk2.pdf");
+};
+
+showQuestion();
+</script>
+
+</body>
+</html>
